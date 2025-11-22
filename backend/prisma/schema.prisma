@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Bảng Users
+model User {
+  id           String    @id @default(uuid(7)) @map("user_id")
+  username     String    @db.VarChar(50)
+  email        String?   @unique @db.VarChar(100)
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  googleId     String?   @unique @map("google_id")
+
+  avatar       String?   @map("avatar_url") // Link ảnh đại diện gốc (Upload hoặc từ Google)
+
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  profile       UserProfile?
+  createdStories Story[]       @relation("UserCreatedStories")
+  flashcards    UserFlashcard[]
+  refreshTokens RefreshToken[]
+  inventory     UserInventory[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Bảng RefreshToken (Auth - JWT)
+model RefreshToken {
+  id          String   @id @default(uuid(7))
+  hashedToken String   @unique @map("hashed_token")
+
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
+
+// 2. Bảng User Profiles (Game Stats & Equipped Items)
+model UserProfile {
+  userId        String    @id @map("user_id")
+
+  // Game Stats
+  level         Int       @default(1)
+  currentXp     Int       @default(0) @map("current_xp")
+  gold          Int       @default(0)
+  streakCount   Int       @default(0) @map("streak_count")
+  lastStudyDate DateTime? @map("last_study_date") @db.Timestamptz
+
+  // Energy System
+  energy        Int       @default(5)
+  maxEnergy     Int       @default(5) @map("max_energy") // Tăng lên khi mua item Upgrade
+
+  // Equipped Items (Lưu ID để truy xuất nhanh)
+  currentAvatarFrameId String? @map("current_avatar_frame_id")
+  currentMascotSkinId  String? @map("current_mascot_skin_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// 3. Bảng Stories (Kho Truyện)
+model Story {
+  id              String   @id @default(uuid(7)) @map("story_id")
+  title           String   @db.VarChar(200)
+  contentJson     Json     @map("content_json") // Cấu trúc Token/Paragraph
+  rawContent      String?  @map("raw_content")  // Text thuần để search
+  genre           String?  @db.VarChar(50)
+  difficultyLevel String?  @map("difficulty_level") @db.VarChar(20)
+
+  // AI Tracking
+  isAiGenerated   Boolean  @default(false) @map("is_ai_generated")
+  userPrompt      String?  @map("user_prompt") // Prompt gốc user nhập
+
+  creatorId       String?  @map("creator_id")
+
+  coverImage      String?  @map("cover_image") @db.VarChar(255)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  creator    User?           @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
+  flashcards UserFlashcard[]
+
+  @@index([title])
+  @@map("stories")
+}
+
+// 4. Bảng Vocabularies (Từ điển gốc)
+model Vocabulary {
+  id             String  @id @default(uuid(7)) @map("vocab_id")
+  word           String  @unique @db.VarChar(100)
+  generalMeaning String? @map("general_meaning")
+  ipa            String? @db.VarChar(100)
+  audioUrl       String? @map("audio_url") @db.VarChar(255)
+  pos            String? @db.VarChar(20)
+
+  flashcards UserFlashcard[]
+
+  @@index([word])
+  @@map("vocabularies")
+}
+
+// 5. Bảng User Flashcards (Core FSRS - Context Aware)
+model UserFlashcard {
+  id               String   @id @default(uuid(7)) @map("card_id")
+
+  userId           String   @map("user_id")
+  vocabId          String   @map("vocab_id")
+  sourceStoryId    String?  @map("source_story_id")
+
+  meaningInContext String   @map("meaning_in_context") // Nghĩa cụ thể trong ngữ cảnh
+  contextSentence  String?  @map("context_sentence")
+
+  // FSRS Params
+  state           Int      @default(0) // 0: New, 1: Learning, 2: Review, 3: Relearning
+  stability       Float    @default(0)
+  difficulty      Float    @default(0)
+  elapsedDays     Int      @default(0) @map("elapsed_days")
+  scheduledDays   Int      @default(0) @map("scheduled_days")
+  retrievability  Float    @default(0)
+
+  lastReview      DateTime? @map("last_review") @db.Timestamptz
+  dueDate         DateTime  @default(now()) @map("due_date") @db.Timestamptz
+
+  isMastered      Boolean   @default(false) @map("is_mastered")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabulary  Vocabulary @relation(fields: [vocabId], references: [id], onDelete: Cascade)
+  sourceStory Story?     @relation(fields: [sourceStoryId], references: [id], onDelete: SetNull)
+  reviewLogs  ReviewLog[]
+
+  @@index([userId, dueDate])
+  @@map("user_flashcards")
+}
+
+// 6. Bảng Review Logs (Lịch sử học)
+model ReviewLog {
+  id             String   @id @default(uuid(7)) @map("log_id")
+
+  cardId         String   @map("card_id")
+
+  rating         Int      // 1: Again, 2: Hard, 3: Good, 4: Easy
+  reviewDuration Int?     @map("review_duration") // Milliseconds
+  reviewedAt     DateTime @default(now()) @map("reviewed_at") @db.Timestamptz
+
+  flashcard UserFlashcard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@map("review_logs")
+}
+
+// 7. Bảng Items (Shop System)
+model Item {
+  id                  String   @id @default(uuid(7)) @map("item_id")
+  name                String   @db.VarChar(100)
+  description         String?
+  type                ItemType
+  price               Int
+  imageUrl            String?  @map("image_url") @db.VarChar(255)
+
+  // Lưu thông số: { "energy_bonus": 5 } hoặc { "asset_url": "cat_skin.glb" }
+  properties          Json?    @map("properties")
+
+  isAiGeneratedReward Boolean  @default(false) @map("is_ai_generated_reward")
+
+  owners              UserInventory[]
+
+  @@map("items")
+}
+
+enum ItemType {
+  AVATAR_FRAME        // Khung avatar
+  MASCOT_SKIN         // Skin cho mèo
+  CARD_THEME          // Hình nền cho thẻ Flashcard
+  ENERGY_MAX_UPGRADE  // Tăng giới hạn năng lượng (Vật phẩm thụ động/Consumable)
+  ENERGY_REFILL       // Hồi đầy năng lượng (Consumable)
+}
+
+// 8. Bảng User Inventory (Túi đồ)
+model UserInventory {
+  id         String   @id @default(uuid(7)) @map("inventory_id")
+
+  userId     String   @map("user_id")
+  itemId     String   @map("item_id")
+
+  quantity   Int      @default(1) // Số lượng (Dùng cho bình năng lượng)
+  isEquipped Boolean  @default(false) @map("is_equipped")
+
+  acquiredAt DateTime @default(now()) @map("acquired_at") @db.Timestamptz
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("user_inventory")
+}
