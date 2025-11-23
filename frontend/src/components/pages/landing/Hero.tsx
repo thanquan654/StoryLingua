@@ -25,7 +25,7 @@ export default function Hero() {
 					</div>
 				</FadeIn>
 
-				<FadeIn delay={0.2}>
+				<div className="animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-10">
 					<h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold font-outfit leading-[1.05] tracking-tight">
 						Forget Memorizing.
 						<br />
@@ -33,12 +33,12 @@ export default function Hero() {
 							Start Living the Language.
 						</span>
 					</h1>
-				</FadeIn>
+				</div>
 
 				<FadeIn delay={0.3}>
 					<p className="text-lg sm:text-xl text-gray-400 leading-relaxed max-w-xl mx-auto lg:mx-0">
-						Stop struggling with boring word lists. Immerse
-						yourself in adventures where
+						Stop struggling with boring word lists. Immerse yourself
+						in adventures where
 						<span className="text-amber-400 font-bold">
 							{' '}
 							learning English feels like playing an RPG
@@ -57,29 +57,16 @@ export default function Hero() {
 							className="relative overflow-hidden h-16 px-10 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold text-xl shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all hover:scale-105 group hover:cursor-pointer"
 						>
 							<span className="relative z-10 flex items-center gap-2">
-								Start Reading for Free{' '}
-								<ArrowRight size={20} />
+								Start Reading for Free <ArrowRight size={20} />
 							</span>
 							<div className="absolute top-0 -left-full w-[50%] h-full bg-linear-to-r from-transparent via-white/40 to-transparent skew-x-12 group-hover:left-[200%] transition-all duration-700" />
 						</Button>
 					</Link>
-
-					<Button
-						size="lg"
-						variant="outline"
-						className="h-16 px-8 rounded-full border-gray-700 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white backdrop-blur-md hover:cursor-pointer"
-					>
-						Watch Trailer
-					</Button>
 				</FadeIn>
 			</div>
 
 			{/* Right Visual - Floating Mockup */}
-			<FadeIn
-				delay={0.5}
-				direction="left"
-				className="relative z-20"
-			>
+			<FadeIn delay={0.5} direction="left" className="relative z-20">
 				<Float>
 					<div className="relative mx-auto w-full max-w-[500px] aspect-4/5 rounded-[2.5rem] border border-white/10 bg-gray-900/50 backdrop-blur-xl shadow-2xl flex flex-col overflow-hidden group hover:border-violet-500/50 transition-colors duration-500">
 						{/* Mockup Header */}
@@ -129,19 +116,13 @@ export default function Hero() {
 						{/* Mockup Bottom Bar */}
 						<div className="h-20 bg-black/40 border-t border-white/5 flex items-center justify-around px-4">
 							<div className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
-								<BookOpen
-									size={18}
-									className="text-gray-400"
-								/>
+								<BookOpen size={18} className="text-gray-400" />
 							</div>
 							<div className="w-14 h-14 rounded-full bg-linear-to-tr from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg -mt-8 border-4 border-[#0F172A]">
 								<Zap size={24} className="text-white" />
 							</div>
 							<div className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
-								<Gamepad2
-									size={18}
-									className="text-gray-400"
-								/>
+								<Gamepad2 size={18} className="text-gray-400" />
 							</div>
 						</div>
 					</div>

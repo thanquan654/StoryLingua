@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Lora, Nunito } from 'next/font/google'
 import './globals.css'
+import { domAnimation, LazyMotion } from 'framer-motion'
 
 export const metadata: Metadata = {
 	title: 'StoryLingua',

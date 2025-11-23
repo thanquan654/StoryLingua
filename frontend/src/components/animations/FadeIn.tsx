@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, Variant, Variants } from 'framer-motion'
 import { ReactNode } from 'react'
 
 interface Props {
@@ -16,7 +16,7 @@ export default function FadeIn({
 	className = '',
 	direction = 'up',
 }: Props) {
-	const variants = {
+	const variants: Variants = {
 		hidden: {
 			opacity: 0,
 			y: direction === 'up' ? 40 : direction === 'down' ? -40 : 0,
@@ -26,7 +26,7 @@ export default function FadeIn({
 			opacity: 1,
 			y: 0,
 			x: 0,
-			transition: { duration: 0.6, ease: 'easeOut', delay },
+			transition: { duration: 0.6, ease: 'easeOut', delay: delay },
 		},
 	}
 
