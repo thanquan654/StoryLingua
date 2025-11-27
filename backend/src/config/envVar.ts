@@ -5,13 +5,17 @@ dotenv.config()
 interface Config {
 	port: number
 	nodeEnv: string
-    clientUrl: string
+	clientUrl: string
+
+	// JTW
+	jwtSecret: string
 }
 
 const config: Config = {
 	port: Number(process.env.PORT) || 3001,
 	nodeEnv: process.env.NODE_ENV || 'development',
-    clientUrl: process.env.CLIENTURL || 'localhost:3001'
+	clientUrl: process.env.CLIENTURL || 'localhost:3001',
+	jwtSecret: process.env.JWT_ACCESS_SECRET!,
 }
 
 export default config

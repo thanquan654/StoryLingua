@@ -1,6 +1,35 @@
 import type { NextFunction, Request, Response } from 'express'
+import type { User } from '../../../generated/prisma/index.js'
 import bcrypt from 'bcryptjs'
 import { createUser, findUserByEmail } from './auth.service.js'
+import { generateAccessToken, generateRefreshToken } from './auth.util.js'
+import envVar from '../../config/envVar.js'
+
+/**
+ * Generates tokens, sets the refresh token cookie, and sends the successful auth response.
+ */
+const sendAuthResponse = async (
+	res: Response,
+	user: User,
+	statusCode: number,
+	msg: string,
+) => {
+	const accessToken = generateAccessToken(user)
+	const refreshToken = await generateRefreshToken(user.id)
+
+	res.cookie('refreshToken', refreshToken, {
+		httpOnly: true,
+		secure: envVar.nodeEnv === 'production',
+		sameSite: 'none',
+		maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+	})
+
+	const { passwordHash, ...userWithoutPassword } = user
+	return res.status(statusCode).json({
+		msg,
+		data: { user: userWithoutPassword, token: accessToken },
+	})
+}
 
 export const login = async (
 	req: Request,
@@ -34,14 +63,7 @@ export const login = async (
 				.json({ msg: 'Email or Password are incorrect' })
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { passwordHash, ...userWithoutPassword } = user
-		return res.status(200).json({
-			msg: 'Login successfully',
-			data: {
-				user: userWithoutPassword,
-			},
-		})
+		return await sendAuthResponse(res, user, 200, 'Login successfully')
 	} catch (error) {
 		next(error)
 	}
@@ -52,7 +74,7 @@ export const register = async (
 	res: Response,
 	next: NextFunction,
 ) => {
-	const { displayName, email, password, confirmPassword } = req.body
+	const { displayName, email, password } = req.body
 
 	try {
 		const user = await findUserByEmail(email)
@@ -71,13 +93,12 @@ export const register = async (
 			googleId: null,
 		})
 
-		const { passwordHash, ...userWithoutPassword } = newUser
-		return res.status(201).json({
-			msg: 'Register successfully',
-			data: {
-				user: userWithoutPassword,
-			},
-		})
+		return await sendAuthResponse(
+			res,
+			newUser,
+			201,
+			'Register successfully',
+		)
 	} catch (error) {
 		next(error)
 	}
