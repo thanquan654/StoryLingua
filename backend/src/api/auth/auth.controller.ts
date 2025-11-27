@@ -52,9 +52,9 @@ return res
 		}
 
 		if (!user.passwordHash) {
-			return res
-				.status(400)
-				.json({ msg: 'Email or Password are incorrect' })
+return res
+	.status(401)
+	.json({ msg: 'Email or Password are incorrect' })
 		}
 
 		const isPasswordMatch = await bcrypt.compare(
