@@ -1,7 +1,7 @@
 import { body } from 'express-validator'
 
 export const loginRules = [
-	body('*').trim().escape(),
+body('*').trim(),
 	body('email')
 		.notEmpty()
 		.withMessage('Email is require')
