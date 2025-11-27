@@ -7,7 +7,7 @@ CREATE TYPE "ItemType" AS ENUM ('AVATAR_FRAME', 'MASCOT_SKIN', 'CARD_THEME', 'EN
 -- CreateTable
 CREATE TABLE "users" (
     "user_id" TEXT NOT NULL,
-    "username" VARCHAR(50) NOT NULL,
+    "display_name" VARCHAR(50) NOT NULL,
     "email" VARCHAR(100),
     "password_hash" VARCHAR(255),
     "google_id" TEXT,
