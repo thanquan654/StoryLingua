@@ -46,9 +46,9 @@ export const login = async (
 	try {
 		const user = await findUserByEmail(email)
 		if (!user) {
-			return res
-				.status(400)
-				.json({ msg: 'Email or Password are incorrect' })
+return res
+	.status(401)
+	.json({ msg: 'Email or Password are incorrect' })
 		}
 
 		if (!user.passwordHash) {
