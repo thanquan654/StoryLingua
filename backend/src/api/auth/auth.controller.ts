@@ -109,6 +109,29 @@ export const register = async (
 	}
 }
 
+export const logout = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	const refreshToken = req.cookies.refreshToken
+
+	if (!refreshToken) {
+		return res.status(200).json({
+			msg: 'Logout successfully',
+		})
+	}
+	try {
+		await deleteRefreshToken(refreshToken) // Sẽ không chạy đến đây nếu refreshToken không tồn tại
+		res.clearCookie('refreshToken')
+		res.status(200).json({
+			msg: 'Logout successfully',
+		})
+	} catch (error) {
+		next(error)
+	}
+}
+
 export const refreshToken = async (
 	req: Request,
 	res: Response,
@@ -139,7 +162,7 @@ export const refreshToken = async (
 		const newRefreshToken = await generateRefreshToken(user.id)
 		res.cookie('refreshToken', newRefreshToken, {
 			httpOnly: true,
-			secure: envVar.nodeEnv === 'production' ? true : false,
+			secure: envVar.nodeEnv === 'production',
 			sameSite: 'none',
 			maxAge: 15 * 24 * 60 * 60 * 1000,
 		})
