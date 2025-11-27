@@ -1,7 +1,12 @@
 import type { NextFunction, Request, Response } from 'express'
 import type { User } from '../../../generated/prisma/index.js'
 import bcrypt from 'bcryptjs'
-import { createUser, findUserByEmail } from './auth.service.js'
+import {
+	createUser,
+	deleteRefreshToken,
+	findRefreshToken,
+	findUserByEmail,
+} from './auth.service.js'
 import { generateAccessToken, generateRefreshToken } from './auth.util.js'
 import envVar from '../../config/envVar.js'
 
@@ -99,6 +104,54 @@ export const register = async (
 			201,
 			'Register successfully',
 		)
+	} catch (error) {
+		next(error)
+	}
+}
+
+export const refreshToken = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	const refreshToken = req.cookies.refreshToken
+
+	if (!refreshToken) {
+		return res.status(401).json({
+			msg: 'Unauthorized',
+		})
+	}
+
+	try {
+		const existingRefreshToken = await findRefreshToken(refreshToken)
+
+		if (!existingRefreshToken) {
+			res.clearCookie('refreshToken')
+			return res.status(403).json({
+				msg: 'Invalid refresh token',
+			})
+		}
+
+		const { user } = existingRefreshToken
+
+		// Refresh Token Rotation
+		await deleteRefreshToken(refreshToken)
+		const newRefreshToken = await generateRefreshToken(user.id)
+		res.cookie('refreshToken', newRefreshToken, {
+			httpOnly: true,
+			secure: envVar.nodeEnv === 'production' ? true : false,
+			sameSite: 'none',
+			maxAge: 15 * 24 * 60 * 60 * 1000,
+		})
+
+		const newAccessToken = generateAccessToken(user)
+
+		return res.status(200).json({
+			msg: 'Refresh token successfully',
+			data: {
+				token: newAccessToken,
+			},
+		})
 	} catch (error) {
 		next(error)
 	}

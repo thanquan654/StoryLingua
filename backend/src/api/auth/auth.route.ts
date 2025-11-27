@@ -19,4 +19,6 @@ router.post(
 	authController.register,
 )
 
+router.post('/refresh-token', authController.refreshToken)
+
 export default router

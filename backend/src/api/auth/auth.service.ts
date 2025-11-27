@@ -1,6 +1,7 @@
-import type { User } from '../../../generated/prisma/index.js'
+import type { RefreshToken, User } from '../../../generated/prisma/index.js'
 import { prisma } from '../../config/prisma.js'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 /**
  * Finds a user by their email address.
@@ -37,6 +38,46 @@ export const createUser = async (
 			passwordHash: hashedPassword,
 			avatar,
 			googleId,
+		},
+	})
+}
+
+/**
+ * Finds a refresh token in the database and includes the associated user.
+ * @param token - The raw refresh token string.
+ * @returns A Promise that resolves to the RefreshToken object with the user included, or null if not found or expired.
+ */
+export const findRefreshToken = async (
+	token: string,
+): Promise<(RefreshToken & { user: User }) | null> => {
+	const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+	const refreshToken = await prisma.refreshToken.findUnique({
+		where: {
+			hashedToken,
+		},
+		include: {
+			user: true,
+		},
+	})
+
+	if (!refreshToken || refreshToken.expiresAt < new Date()) {
+		return null
+	}
+
+	return refreshToken
+}
+
+/**
+ * Deletes a refresh token from the database.
+ * @param token - The raw refresh token string to delete.
+ */
+export const deleteRefreshToken = async (token: string): Promise<void> => {
+	const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+	await prisma.refreshToken.deleteMany({
+		where: {
+			hashedToken,
 		},
 	})
 }
