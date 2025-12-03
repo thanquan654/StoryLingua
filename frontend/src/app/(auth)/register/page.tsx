@@ -15,34 +15,46 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import GoogleIcon from '@/components/ui/google-icon' // Giả sử bạn đã tách component này
+import { authService } from '@/services/auth.service'
+import { RegisterRequest } from '@/types/auth'
 
 export default function RegisterPage() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+	const [error, setError] = useState<string | null>('')
 
 	// Form States
-	const [formData, setFormData] = useState({
-		username: '',
-		email: '',
-		password: '',
-		confirmPassword: '',
-	})
+	const [registerformValue, setRegisterFormValue] = useState<RegisterRequest>(
+		{
+			displayName: '',
+			email: '',
+			password: '',
+			confirmPassword: '',
+		},
+	)
 
 	// Handle Input Change
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target
-		setFormData((prev) => ({ ...prev, [name]: value }))
+		setRegisterFormValue((prev) => ({ ...prev, [name]: value }))
 	}
 
 	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault()
-
 		setIsLoading(true)
-		// Simulate API
-		await new Promise((r) => setTimeout(r, 2000))
-		setIsLoading(false)
-		console.log('Registered:', formData)
+		setError(null)
+
+		try {
+			const data = await authService.register(registerformValue)
+
+			console.log('🚀 ~ data:', data)
+		} catch (err) {
+			if (err instanceof Error) setError(err.message)
+			else setError('Unknown Error')
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
 	return (
@@ -100,7 +112,7 @@ export default function RegisterPage() {
 						{/* Username Input */}
 						<div className="space-y-2">
 							<label className="text-sm font-medium text-gray-300 ml-1">
-								Username
+								Display Name
 							</label>
 							<div className="relative group">
 								<User
@@ -108,10 +120,10 @@ export default function RegisterPage() {
 									size={18}
 								/>
 								<input
-									name="username"
+									name="displayName"
 									type="text"
 									placeholder="john_doe"
-									value={formData.username}
+									value={registerformValue.displayName}
 									onChange={handleChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
@@ -134,7 +146,7 @@ export default function RegisterPage() {
 									name="email"
 									type="email"
 									placeholder="name@example.com"
-									value={formData.email}
+									value={registerformValue.email}
 									onChange={handleChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
@@ -157,7 +169,7 @@ export default function RegisterPage() {
 									name="password"
 									type={showPassword ? 'text' : 'password'}
 									placeholder="••••••••"
-									value={formData.password}
+									value={registerformValue.password}
 									onChange={handleChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
@@ -197,7 +209,7 @@ export default function RegisterPage() {
 											: 'password'
 									}
 									placeholder="••••••••"
-									value={formData.confirmPassword}
+									value={registerformValue.confirmPassword}
 									onChange={handleChange}
 									className={`w-full bg-[#1E293B] border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-all shadow-sm border-gray-700 focus:border-amber-500 focus:ring-amber-500`}
 									required
@@ -236,6 +248,14 @@ export default function RegisterPage() {
 								'Sign Up'
 							)}
 						</Button>
+
+						{/* ERROR MESSAGE ALERT */}
+						{error && (
+							<div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+								<AlertCircle size={16} />
+								{error}
+							</div>
+						)}
 					</form>
 
 					{/* Divider & Social */}
