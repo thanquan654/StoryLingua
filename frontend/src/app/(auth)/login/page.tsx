@@ -40,7 +40,8 @@ export default function LoginPage() {
 
 			console.log('🚀 ~ data:', data)
 		} catch (err) {
-			setError('Email hoặc mật khẩu không chính xác.')
+			if (err instanceof Error) setError(err.message)
+			else setError('Unknown Error')
 		} finally {
 			setIsLoading(false)
 		}

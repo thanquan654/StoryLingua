@@ -21,7 +21,7 @@ export const apiClient = async <T>(
 	})
 
 	if (!res.ok) {
-		const errorData = await res.json().catch(() => ({}))
+		const errorData = await res.json()
 		throw new Error(errorData.message || 'API Call Failed')
 	}
 
