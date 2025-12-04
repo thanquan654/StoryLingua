@@ -1,3 +1,5 @@
+import { ApiError, ErrorResponse } from '@/types/common'
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 type FetchOptions = RequestInit & {
@@ -21,8 +23,18 @@ export const apiClient = async <T>(
 	})
 
 	if (!res.ok) {
-		const errorData = await res.json()
-		throw new Error(errorData.message || 'API Call Failed')
+		let errorData: ErrorResponse
+
+		try {
+			errorData = await res.json()
+		} catch {
+			errorData = {
+				message: 'Internal Server Error',
+			}
+		}
+
+		// 3. Ném ra lỗi ApiError có gắn kèm Status Code
+		throw new ApiError(res.status, errorData)
 	}
 
 	return res.json() as Promise<T>

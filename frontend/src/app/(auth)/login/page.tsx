@@ -9,8 +9,11 @@ import { useState } from 'react'
 import GoogleIcon from '@/components/ui/google-icon'
 import { authService } from '@/services/auth.service'
 import { LoginRequest } from '@/types/auth'
+import { ApiError } from '@/types/common'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+	const router = useRouter()
 	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 	const [error, setError] = useState<string | null>('')
@@ -36,12 +39,16 @@ export default function LoginPage() {
 		setError(null)
 
 		try {
-			const data = await authService.login(loginFormValue)
-
-			console.log('🚀 ~ data:', data)
+			await authService.login(loginFormValue)
+			router.push('/')
 		} catch (err) {
-			if (err instanceof Error) setError(err.message)
-			else setError('Unknown Error')
+			if (err instanceof ApiError) {
+				if (err.status === 429) {
+					setError('Too Many Request, please try later')
+				} else {
+					setError(err.message)
+				}
+			} else setError('Unknown Error')
 		} finally {
 			setIsLoading(false)
 		}

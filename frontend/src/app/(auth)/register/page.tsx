@@ -2,23 +2,17 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import {
-	ArrowLeft,
-	Mail,
-	Lock,
-	User,
-	Eye,
-	EyeOff,
-	Check,
-	X,
-	AlertCircle,
-} from 'lucide-react'
-import { useState, useEffect } from 'react'
-import GoogleIcon from '@/components/ui/google-icon' // Giả sử bạn đã tách component này
+import { Mail, Lock, User, Eye, EyeOff, Check, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import GoogleIcon from '@/components/ui/google-icon'
 import { authService } from '@/services/auth.service'
 import { RegisterRequest } from '@/types/auth'
+import { ApiError } from '@/types/common'
+import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
+	const router = useRouter()
+
 	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -34,8 +28,9 @@ export default function RegisterPage() {
 		},
 	)
 
-	// Handle Input Change
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleRegisterValueChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const { name, value } = e.target
 		setRegisterFormValue((prev) => ({ ...prev, [name]: value }))
 	}
@@ -46,12 +41,17 @@ export default function RegisterPage() {
 		setError(null)
 
 		try {
-			const data = await authService.register(registerformValue)
+			await authService.register(registerformValue)
 
-			console.log('🚀 ~ data:', data)
+			router.push('/')
 		} catch (err) {
-			if (err instanceof Error) setError(err.message)
-			else setError('Unknown Error')
+			if (err instanceof ApiError) {
+				if (err.status === 429) {
+					setError('Too Many Request, please try later')
+				} else {
+					setError(err.message)
+				}
+			} else setError('Unknown Error')
 		} finally {
 			setIsLoading(false)
 		}
@@ -124,7 +124,7 @@ export default function RegisterPage() {
 									type="text"
 									placeholder="john_doe"
 									value={registerformValue.displayName}
-									onChange={handleChange}
+									onChange={handleRegisterValueChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="off"
@@ -147,7 +147,7 @@ export default function RegisterPage() {
 									type="email"
 									placeholder="name@example.com"
 									value={registerformValue.email}
-									onChange={handleChange}
+									onChange={handleRegisterValueChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="email"
@@ -170,7 +170,7 @@ export default function RegisterPage() {
 									type={showPassword ? 'text' : 'password'}
 									placeholder="••••••••"
 									value={registerformValue.password}
-									onChange={handleChange}
+									onChange={handleRegisterValueChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="new-password"
@@ -210,7 +210,7 @@ export default function RegisterPage() {
 									}
 									placeholder="••••••••"
 									value={registerformValue.confirmPassword}
-									onChange={handleChange}
+									onChange={handleRegisterValueChange}
 									className={`w-full bg-[#1E293B] border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-all shadow-sm border-gray-700 focus:border-amber-500 focus:ring-amber-500`}
 									required
 									autoComplete="new-password"
