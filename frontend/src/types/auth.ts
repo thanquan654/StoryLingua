@@ -1,13 +1,11 @@
-import { User } from '@/types/user'
-
 export type LoginRequest = {
 	email: string
 	password: string
 }
 
 export type LoginResponse = {
-	user: User
-	token: string
+	accessToken: string
+	refreshToken: string
 }
 
 export type RegisterRequest = {
@@ -18,6 +16,6 @@ export type RegisterRequest = {
 }
 
 export type RegisterResponse = {
-	user: User
-	token: string
+	accessToken: string
+	refreshToken: string
 }

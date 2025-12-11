@@ -1,6 +1,8 @@
 import { ApiError, ErrorResponse } from '@/types/common'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+// Logic chọn Base URL
+const isServer = typeof window === 'undefined'
+const BASE_URL = isServer ? process.env.NEXT_PUBLIC_API_URL : '/api/proxy'
 
 type FetchOptions = RequestInit & {
 	header?: Record<string, string>
@@ -10,14 +12,19 @@ export const apiClient = async <T>(
 	endpoint: string,
 	options?: FetchOptions,
 ): Promise<T> => {
+	const cleanEndpoint = endpoint.startsWith('/')
+		? endpoint.slice(1)
+		: endpoint
+	const url = `${BASE_URL}/${cleanEndpoint}`
+
 	const headers = {
 		'Content-Type': 'application/json',
 		...options?.headers,
 	}
 
-	console.log(`API: ${BASE_URL}${endpoint}`)
+	console.log(`🚀 API [${isServer ? 'Server' : 'Client'}]: ${url}`)
 
-	const res = await fetch(`${BASE_URL}${endpoint}`, {
+	const res = await fetch(url, {
 		...options,
 		headers,
 	})
@@ -33,7 +40,6 @@ export const apiClient = async <T>(
 			}
 		}
 
-		// 3. Ném ra lỗi ApiError có gắn kèm Status Code
 		throw new ApiError(res.status, errorData)
 	}
 

@@ -7,52 +7,15 @@ import FadeIn from '@/components/animations/FadeIn'
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import GoogleIcon from '@/components/ui/google-icon'
-import { authService } from '@/services/auth.service'
-import { LoginRequest } from '@/types/auth'
-import { ApiError } from '@/types/common'
-import { useRouter } from 'next/navigation'
+import { useActionState } from 'react'
+import { loginAction } from '@/app/actions/authActions'
 
 export default function LoginPage() {
-	const router = useRouter()
-	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
-	const [error, setError] = useState<string | null>('')
 
-	const [loginFormValue, setLoginFormValue] = useState<LoginRequest>({
-		email: '',
-		password: '',
+	const [state, formAction, isPending] = useActionState(loginAction, {
+		message: '',
 	})
-
-	const handleLoginFormValueChange = (
-		e: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		const { name, value } = e.target
-		setLoginFormValue((prev) => ({
-			...prev,
-			[name]: value,
-		}))
-	}
-
-	const handleLogin = async (e: React.FormEvent) => {
-		e.preventDefault()
-		setIsLoading(true)
-		setError(null)
-
-		try {
-			await authService.login(loginFormValue)
-			router.push('/')
-		} catch (err) {
-			if (err instanceof ApiError) {
-				if (err.status === 429) {
-					setError('Too Many Request, please try later')
-				} else {
-					setError(err.message)
-				}
-			} else setError('Unknown Error')
-		} finally {
-			setIsLoading(false)
-		}
-	}
 
 	return (
 		<div className="min-h-screen w-full grid lg:grid-cols-2 bg-[#0F172A] text-white font-sans overflow-hidden">
@@ -68,7 +31,7 @@ export default function LoginPage() {
 						</p>
 					</div>
 
-					<form onSubmit={handleLogin} className="space-y-5">
+					<form action={formAction} className="space-y-5">
 						{/* Email Input */}
 						<div className="space-y-2">
 							<label
@@ -86,8 +49,6 @@ export default function LoginPage() {
 									id="email"
 									name="email"
 									type="email"
-									value={loginFormValue.email}
-									onChange={handleLoginFormValueChange}
 									autoComplete="username"
 									placeholder="name@example.com"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
@@ -121,8 +82,6 @@ export default function LoginPage() {
 									id="password"
 									name="password"
 									type={showPassword ? 'text' : 'password'}
-									value={loginFormValue.password}
-									onChange={handleLoginFormValueChange}
 									autoComplete="current-password"
 									placeholder="••••••••"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
@@ -153,9 +112,9 @@ export default function LoginPage() {
 						<Button
 							type="submit"
 							className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold shadow-[0_4px_14px_0_rgba(124,58,237,0.39)] hover:shadow-[0_6px_20px_rgba(124,58,237,0.23)] hover:-translate-y-0.5 transition-all duration-200 hover:cursor-pointer"
-							disabled={isLoading}
+							disabled={isPending}
 						>
-							{isLoading ? (
+							{isPending ? (
 								<span className="flex items-center gap-2">
 									<span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
 									Logging in...
@@ -166,10 +125,10 @@ export default function LoginPage() {
 						</Button>
 
 						{/* ERROR MESSAGE ALERT */}
-						{error && (
+						{state.message && (
 							<div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
 								<AlertCircle size={16} />
-								{error}
+								{state.message}
 							</div>
 						)}
 					</form>
