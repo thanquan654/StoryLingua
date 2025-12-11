@@ -1,7 +1,12 @@
-'use client'
-
 import RegisterArtwork from '@/components/pages/auth/register/Artwork'
 import RegisterFrom from '@/components/pages/auth/register/From'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+	title: 'Register',
+	description:
+		'Welcome to StoryLingua. Register to access your dashboard and continue your English mastery journey today.',
+}
 
 export default function RegisterPage() {
 	return (
