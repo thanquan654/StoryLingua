@@ -3,59 +3,17 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Mail, Lock, User, Eye, EyeOff, Check, AlertCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useActionState, useState } from 'react'
 import GoogleIcon from '@/components/ui/google-icon'
-import { authService } from '@/services/auth.service'
-import { RegisterRequest } from '@/types/auth'
-import { ApiError } from '@/types/common'
-import { useRouter } from 'next/navigation'
+import { registerAction } from '@/app/actions/authActions'
 
 export default function RegisterPage() {
-	const router = useRouter()
-
-	const [isLoading, setIsLoading] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-	const [error, setError] = useState<string | null>('')
 
-	// Form States
-	const [registerformValue, setRegisterFormValue] = useState<RegisterRequest>(
-		{
-			displayName: '',
-			email: '',
-			password: '',
-			confirmPassword: '',
-		},
-	)
-
-	const handleRegisterValueChange = (
-		e: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		const { name, value } = e.target
-		setRegisterFormValue((prev) => ({ ...prev, [name]: value }))
-	}
-
-	const handleRegister = async (e: React.FormEvent) => {
-		e.preventDefault()
-		setIsLoading(true)
-		setError(null)
-
-		try {
-			await authService.register(registerformValue)
-
-			router.push('/')
-		} catch (err) {
-			if (err instanceof ApiError) {
-				if (err.status === 429) {
-					setError('Too Many Request, please try later')
-				} else {
-					setError(err.message)
-				}
-			} else setError('Unknown Error')
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	const [state, formAction, isPending] = useActionState(registerAction, {
+		message: '',
+	})
 
 	return (
 		<div className="min-h-screen w-full grid lg:grid-cols-2 bg-[#0F172A] text-white font-sans overflow-hidden">
@@ -108,7 +66,7 @@ export default function RegisterPage() {
 						</p>
 					</div>
 
-					<form onSubmit={handleRegister} className="space-y-5">
+					<form action={formAction} className="space-y-5">
 						{/* Username Input */}
 						<div className="space-y-2">
 							<label className="text-sm font-medium text-gray-300 ml-1">
@@ -123,8 +81,7 @@ export default function RegisterPage() {
 									name="displayName"
 									type="text"
 									placeholder="john_doe"
-									value={registerformValue.displayName}
-									onChange={handleRegisterValueChange}
+									defaultValue=""
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="off"
@@ -145,9 +102,8 @@ export default function RegisterPage() {
 								<input
 									name="email"
 									type="email"
+									defaultValue=""
 									placeholder="name@example.com"
-									value={registerformValue.email}
-									onChange={handleRegisterValueChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="email"
@@ -167,10 +123,9 @@ export default function RegisterPage() {
 								/>
 								<input
 									name="password"
+									defaultValue=""
 									type={showPassword ? 'text' : 'password'}
 									placeholder="••••••••"
-									value={registerformValue.password}
-									onChange={handleRegisterValueChange}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="new-password"
@@ -208,9 +163,8 @@ export default function RegisterPage() {
 											? 'text'
 											: 'password'
 									}
+									defaultValue=""
 									placeholder="••••••••"
-									value={registerformValue.confirmPassword}
-									onChange={handleRegisterValueChange}
 									className={`w-full bg-[#1E293B] border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-all shadow-sm border-gray-700 focus:border-amber-500 focus:ring-amber-500`}
 									required
 									autoComplete="new-password"
@@ -237,9 +191,9 @@ export default function RegisterPage() {
 						<Button
 							type="submit"
 							className="w-full h-12 bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black rounded-xl font-bold shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all hover:cursor-pointer hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-							disabled={isLoading}
+							disabled={isPending}
 						>
-							{isLoading ? (
+							{isPending ? (
 								<span className="flex items-center gap-2">
 									<span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
 									Creating Account...
@@ -250,10 +204,10 @@ export default function RegisterPage() {
 						</Button>
 
 						{/* ERROR MESSAGE ALERT */}
-						{error && (
+						{state.message && (
 							<div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
 								<AlertCircle size={16} />
-								{error}
+								{state.message}
 							</div>
 						)}
 					</form>

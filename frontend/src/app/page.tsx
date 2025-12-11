@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic'
 import Navbar from '@/components/pages/landing/Navbar'
 import Hero from '@/components/pages/landing/Hero'
-import { cookies } from 'next/headers'
 
 const BentoGrid = dynamic(
 	() => import('@/components/pages/landing/BentoGrid'),
@@ -41,11 +40,6 @@ const MethodologySection = dynamic(
 )
 
 export default async function LandingPage() {
-	const cookie = await cookies()
-
-	console.log(cookie.get('refreshToken'))
-	console.log(cookie.get('accessToken'))
-
 	return (
 		<div className="min-h-screen bg-[#050B14] text-white overflow-x-hidden font-sans selection:bg-indigo-500/30">
 			<CosmicBackground />
