@@ -81,12 +81,21 @@ export default function RegisterPage() {
 									name="displayName"
 									type="text"
 									placeholder="john_doe"
-									defaultValue=""
+									min={4}
+									max={32}
+									defaultValue={
+										state?.payload?.displayName || ''
+									}
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="off"
 								/>
 							</div>
+							{state?.errors?.displayName && (
+								<p className="text-sm text-red-500 mt-1">
+									{state.errors.displayName[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Email Input */}
@@ -102,13 +111,18 @@ export default function RegisterPage() {
 								<input
 									name="email"
 									type="email"
-									defaultValue=""
+									defaultValue={state?.payload?.email || ''}
 									placeholder="name@example.com"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 									required
 									autoComplete="email"
 								/>
 							</div>
+							{state?.errors?.email && (
+								<p className="text-sm text-red-500 mt-1">
+									{state.errors.email[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Password Input & Strength Meter */}
@@ -123,7 +137,11 @@ export default function RegisterPage() {
 								/>
 								<input
 									name="password"
-									defaultValue=""
+									defaultValue={
+										state?.payload?.password || ''
+									}
+									min={6}
+									max={32}
 									type={showPassword ? 'text' : 'password'}
 									placeholder="••••••••"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
@@ -144,6 +162,11 @@ export default function RegisterPage() {
 									)}
 								</button>
 							</div>
+							{state?.errors?.password && (
+								<p className="text-sm text-red-500 mt-1">
+									{state.errors.password[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Confirm Password Input */}
@@ -163,7 +186,11 @@ export default function RegisterPage() {
 											? 'text'
 											: 'password'
 									}
-									defaultValue=""
+									min={6}
+									max={32}
+									defaultValue={
+										state?.payload?.confirmPassword || ''
+									}
 									placeholder="••••••••"
 									className={`w-full bg-[#1E293B] border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-all shadow-sm border-gray-700 focus:border-amber-500 focus:ring-amber-500`}
 									required
@@ -185,6 +212,11 @@ export default function RegisterPage() {
 									)}
 								</button>
 							</div>
+							{state?.errors?.confirmPassword && (
+								<p className="text-sm text-red-500 mt-1">
+									{state.errors.confirmPassword[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Submit Button */}

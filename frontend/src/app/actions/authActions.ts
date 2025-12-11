@@ -1,15 +1,19 @@
 'use server'
 
 import { authService } from '@/services/auth.service'
-import { FormState, LoginFormSchema } from '@/types/auth'
+import {
+	AuthFormState,
+	LoginFormSchema,
+	RegisterFormSchema,
+} from '@/types/auth'
 import { ApiError } from '@/types/common'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function loginAction(
-	_prevState: FormState,
+	_prevState: AuthFormState,
 	loginFormData: FormData,
-): Promise<FormState> {
+): Promise<AuthFormState> {
 	const email = loginFormData.get('email') as string
 	const password = loginFormData.get('password') as string
 
@@ -23,6 +27,7 @@ export async function loginAction(
 			errors: validatedFields.error.flatten().fieldErrors,
 			payload: {
 				email: email,
+				password: password,
 			},
 		}
 	}
@@ -54,6 +59,7 @@ export async function loginAction(
 					message: 'Too Many Request, please try later',
 					payload: {
 						email: email,
+						password: password,
 					},
 				}
 			}
@@ -61,6 +67,7 @@ export async function loginAction(
 				message: error.message,
 				payload: {
 					email: email,
+					password: password,
 				},
 			}
 		}
@@ -71,13 +78,32 @@ export async function loginAction(
 }
 
 export async function registerAction(
-	_prevState: unknown,
+	_prevState: AuthFormState,
 	registerFormData: FormData,
 ) {
 	const displayName = registerFormData.get('displayName') as string
 	const email = registerFormData.get('email') as string
 	const password = registerFormData.get('password') as string
 	const confirmPassword = registerFormData.get('confirmPassword') as string
+
+	const validatedFields = RegisterFormSchema.safeParse({
+		displayName,
+		email,
+		password,
+		confirmPassword,
+	})
+
+	if (!validatedFields.success) {
+		return {
+			errors: validatedFields.error.flatten().fieldErrors,
+			payload: {
+				displayName: displayName,
+				email: email,
+				password: password,
+				confirmPassword: confirmPassword,
+			},
+		}
+	}
 
 	try {
 		const res = await authService.register({
@@ -109,7 +135,15 @@ export async function registerAction(
 			if (error.status === 429) {
 				return { message: 'Too Many Request, please try later' }
 			}
-			return { message: error.message }
+			return {
+				message: error.message,
+				payload: {
+					displayName: displayName,
+					email: email,
+					password: password,
+					confirmPassword: confirmPassword,
+				},
+			}
 		}
 		return { message: 'Unknown Error' }
 	}

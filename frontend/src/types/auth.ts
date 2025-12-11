@@ -30,15 +30,41 @@ export const LoginFormSchema = z.object({
 		.max(32, { message: 'Password is too long' }),
 })
 
+export const RegisterFormSchema = z
+	.object({
+		displayName: z
+			.string()
+			.min(4, 'Name must be at least 4 characters long')
+			.max(32, 'Name is too long'),
+		email: z.email({ message: 'Email is invalid' }),
+		password: z
+			.string()
+			.min(6, { message: 'Password must be at least 6 characters long' })
+			.max(32, { message: 'Password is too long' }),
+		confirmPassword: z
+			.string()
+			.min(6, { message: 'Password must be at least 6 characters long' })
+			.max(32, { message: 'Password is too long' }),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords don't match",
+		path: ['confirmPassword'],
+	})
+
 export type AuthFormState =
 	| {
 			errors?: {
+				displayName?: string[]
 				email?: string[]
 				password?: string[]
+				confirmPassword?: string[]
 			}
 			message?: string
 			payload?: {
-				email: string
+				displayName?: string
+				email?: string
+				password?: string
+				confirmPassword?: string
 			}
 	  }
 	| undefined
