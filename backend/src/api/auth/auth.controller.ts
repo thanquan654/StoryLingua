@@ -8,7 +8,6 @@ import {
 	findUserByEmail,
 } from './auth.service.js'
 import { generateAccessToken, generateRefreshToken } from './auth.util.js'
-import envVar from '../../config/envVar.js'
 
 /**
  * Generates tokens, sets the refresh token cookie, and sends the successful auth response.
@@ -22,17 +21,9 @@ const sendAuthResponse = async (
 	const accessToken = generateAccessToken(user)
 	const refreshToken = await generateRefreshToken(user.id)
 
-	res.cookie('refreshToken', refreshToken, {
-		httpOnly: true,
-		secure: envVar.nodeEnv === 'production',
-		sameSite: 'none',
-		maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
-	})
-
-	const { passwordHash, ...userWithoutPassword } = user
 	return res.status(statusCode).json({
 		message,
-		data: { user: userWithoutPassword, token: accessToken },
+		data: { accessToken, refreshToken },
 	})
 }
 
@@ -160,19 +151,13 @@ export const refreshToken = async (
 		// Refresh Token Rotation
 		await deleteRefreshToken(refreshToken)
 		const newRefreshToken = await generateRefreshToken(user.id)
-		res.cookie('refreshToken', newRefreshToken, {
-			httpOnly: true,
-			secure: envVar.nodeEnv === 'production',
-			sameSite: 'none',
-			maxAge: 15 * 24 * 60 * 60 * 1000,
-		})
-
 		const newAccessToken = generateAccessToken(user)
 
 		return res.status(200).json({
 			message: 'Refresh token successfully',
 			data: {
-				token: newAccessToken,
+				refreshToken: newRefreshToken,
+				accessToken: newAccessToken,
 			},
 		})
 	} catch (error) {
