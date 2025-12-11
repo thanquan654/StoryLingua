@@ -49,12 +49,21 @@ export default function LoginPage() {
 									id="email"
 									name="email"
 									type="email"
+									defaultValue={state?.payload?.email || ''}
 									autoComplete="username"
 									placeholder="name@example.com"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
 									required
 								/>
 							</div>
+							{state?.errors?.email && (
+								<p
+									id="email-error"
+									className="text-sm text-red-500 mt-1"
+								>
+									{state.errors.email[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Password Input */}
@@ -81,8 +90,11 @@ export default function LoginPage() {
 								<input
 									id="password"
 									name="password"
+									defaultValue=""
 									type={showPassword ? 'text' : 'password'}
 									autoComplete="current-password"
+									min={6}
+									max={32}
 									placeholder="••••••••"
 									className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
 									required
@@ -106,6 +118,14 @@ export default function LoginPage() {
 									)}
 								</button>
 							</div>
+							{state?.errors?.password && (
+								<p
+									id="password-error"
+									className="text-sm text-red-500 mt-1"
+								>
+									{state.errors.password[0]}
+								</p>
+							)}
 						</div>
 
 						{/* Submit Button */}
@@ -125,7 +145,7 @@ export default function LoginPage() {
 						</Button>
 
 						{/* ERROR MESSAGE ALERT */}
-						{state.message && (
+						{state?.message && (
 							<div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
 								<AlertCircle size={16} />
 								{state.message}
