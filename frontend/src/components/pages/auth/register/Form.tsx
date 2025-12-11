@@ -7,7 +7,7 @@ import { useActionState, useState } from 'react'
 import GoogleIcon from '@/components/ui/google-icon'
 import { registerAction } from '@/app/actions/authActions'
 
-export default function RegisterFrom() {
+export default function RegisterForm() {
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -185,7 +185,7 @@ export default function RegisterFrom() {
 					</Button>
 
 					{/* ERROR MESSAGE ALERT */}
-					{state.message && (
+					{state?.message && (
 						<div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
 							<AlertCircle size={16} />
 							{state.message}

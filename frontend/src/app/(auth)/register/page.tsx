@@ -1,5 +1,5 @@
 import RegisterArtwork from '@/components/pages/auth/register/Artwork'
-import RegisterFrom from '@/components/pages/auth/register/Form'
+import RegisterForm from '@/components/pages/auth/register/Form'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export default function RegisterPage() {
 	return (
 		<div className="min-h-screen w-full grid lg:grid-cols-2 bg-[#0F172A] text-white font-sans overflow-hidden">
 			<RegisterArtwork />
-			<RegisterFrom />
+			<RegisterForm />
 		</div>
 	)
 }

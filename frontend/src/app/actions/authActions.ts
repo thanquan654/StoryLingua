@@ -86,7 +86,7 @@ export async function loginAction(
 export async function registerAction(
 	_prevState: AuthFormState,
 	registerFormData: FormData,
-) {
+): Promise<AuthFormState> {
 	const displayName = registerFormData.get('displayName') as string
 	const email = registerFormData.get('email') as string
 	const password = registerFormData.get('password') as string
