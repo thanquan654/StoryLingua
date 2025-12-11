@@ -1,5 +1,5 @@
 import RegisterArtwork from '@/components/pages/auth/register/Artwork'
-import RegisterFrom from '@/components/pages/auth/register/From'
+import RegisterFrom from '@/components/pages/auth/register/Form'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
