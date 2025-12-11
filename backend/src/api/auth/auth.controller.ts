@@ -8,7 +8,6 @@ import {
 	findUserByEmail,
 } from './auth.service.js'
 import { generateAccessToken, generateRefreshToken } from './auth.util.js'
-import envVar from '../../config/envVar.js'
 
 /**
  * Generates tokens, sets the refresh token cookie, and sends the successful auth response.
@@ -17,22 +16,14 @@ const sendAuthResponse = async (
 	res: Response,
 	user: User,
 	statusCode: number,
-	msg: string,
+	message: string,
 ) => {
 	const accessToken = generateAccessToken(user)
 	const refreshToken = await generateRefreshToken(user.id)
 
-	res.cookie('refreshToken', refreshToken, {
-		httpOnly: true,
-		secure: envVar.nodeEnv === 'production',
-		sameSite: 'none',
-		maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
-	})
-
-	const { passwordHash, ...userWithoutPassword } = user
 	return res.status(statusCode).json({
-		msg,
-		data: { user: userWithoutPassword, token: accessToken },
+		message,
+		data: { accessToken, refreshToken },
 	})
 }
 
@@ -46,15 +37,15 @@ export const login = async (
 	try {
 		const user = await findUserByEmail(email)
 		if (!user) {
-return res
-	.status(401)
-	.json({ msg: 'Email or Password are incorrect' })
+			return res
+				.status(401)
+				.json({ message: 'Email or Password are incorrect' })
 		}
 
 		if (!user.passwordHash) {
-return res
-	.status(401)
-	.json({ msg: 'Email or Password are incorrect' })
+			return res
+				.status(401)
+				.json({ message: 'Email or Password are incorrect' })
 		}
 
 		const isPasswordMatch = await bcrypt.compare(
@@ -64,8 +55,8 @@ return res
 
 		if (!isPasswordMatch) {
 			return res
-				.status(400)
-				.json({ msg: 'Email or Password are incorrect' })
+				.status(401)
+				.json({ message: 'Email or Password are incorrect' })
 		}
 
 		return await sendAuthResponse(res, user, 200, 'Login successfully')
@@ -86,7 +77,7 @@ export const register = async (
 
 		if (user) {
 			return res.status(400).json({
-				msg: 'Email already used',
+				message: 'Email already used',
 			})
 		}
 
@@ -118,14 +109,14 @@ export const logout = async (
 
 	if (!refreshToken) {
 		return res.status(200).json({
-			msg: 'Logout successfully',
+			message: 'Logout successfully',
 		})
 	}
 	try {
-		await deleteRefreshToken(refreshToken) // Sẽ không chạy đến đây nếu refreshToken không tồn tại
+		await deleteRefreshToken(refreshToken) // This line will not be reached if the refreshToken does not exist
 		res.clearCookie('refreshToken')
 		res.status(200).json({
-			msg: 'Logout successfully',
+			message: 'Logout successfully',
 		})
 	} catch (error) {
 		next(error)
@@ -141,7 +132,7 @@ export const refreshToken = async (
 
 	if (!refreshToken) {
 		return res.status(401).json({
-			msg: 'Unauthorized',
+			message: 'Unauthorized',
 		})
 	}
 
@@ -151,7 +142,7 @@ export const refreshToken = async (
 		if (!existingRefreshToken) {
 			res.clearCookie('refreshToken')
 			return res.status(403).json({
-				msg: 'Invalid refresh token',
+				message: 'Invalid refresh token',
 			})
 		}
 
@@ -160,19 +151,13 @@ export const refreshToken = async (
 		// Refresh Token Rotation
 		await deleteRefreshToken(refreshToken)
 		const newRefreshToken = await generateRefreshToken(user.id)
-		res.cookie('refreshToken', newRefreshToken, {
-			httpOnly: true,
-			secure: envVar.nodeEnv === 'production',
-			sameSite: 'none',
-			maxAge: 15 * 24 * 60 * 60 * 1000,
-		})
-
 		const newAccessToken = generateAccessToken(user)
 
 		return res.status(200).json({
-			msg: 'Refresh token successfully',
+			message: 'Refresh token successfully',
 			data: {
-				token: newAccessToken,
+				refreshToken: newRefreshToken,
+				accessToken: newAccessToken,
 			},
 		})
 	} catch (error) {

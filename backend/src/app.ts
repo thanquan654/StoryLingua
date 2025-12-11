@@ -2,10 +2,10 @@ import express from 'express'
 import { errorHandler } from './middlewares/errorHandler.js'
 import morgan from 'morgan'
 import cors from 'cors'
-import { rateLimit } from 'express-rate-limit'
 import cookieParser from 'cookie-parser'
 import envVar from './config/envVar.js'
 import appRouter from './api/index.js'
+import { globalLimiter } from './middlewares/rateLimiters.js'
 
 const app = express()
 
@@ -19,10 +19,7 @@ app.use(
 	}),
 )
 app.use(morgan('combined'))
-app.use(rateLimit({
-    max: 10,
-    windowMs: 15 * 60 * 1000
-}))
+app.use(globalLimiter)
 
 // Routes
 app.use('/api/', appRouter)

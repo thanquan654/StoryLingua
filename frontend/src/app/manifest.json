@@ -1,7 +1,7 @@
 {
 	"name": "StoryLingua",
 	"short_name": "StoryLingua",
-	"start_url": "/",
+	"start_url": "/login",
 	"icons": [
 		{
 			"src": "/web-app-manifest-192x192.png",

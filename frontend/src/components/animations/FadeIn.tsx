@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, Variant, Variants } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 import { ReactNode } from 'react'
 
 interface Props {

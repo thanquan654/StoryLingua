@@ -39,7 +39,7 @@ const MethodologySection = dynamic(
 	},
 )
 
-export default function LandingPage() {
+export default async function LandingPage() {
 	return (
 		<div className="min-h-screen bg-[#050B14] text-white overflow-x-hidden font-sans selection:bg-indigo-500/30">
 			<CosmicBackground />
