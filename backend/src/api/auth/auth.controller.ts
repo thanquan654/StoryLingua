@@ -55,7 +55,7 @@ export const login = async (
 
 		if (!isPasswordMatch) {
 			return res
-				.status(400)
+				.status(401)
 				.json({ message: 'Email or Password are incorrect' })
 		}
 
@@ -113,7 +113,7 @@ export const logout = async (
 		})
 	}
 	try {
-		await deleteRefreshToken(refreshToken) // Sẽ không chạy đến đây nếu refreshToken không tồn tại
+		await deleteRefreshToken(refreshToken) // This line will not be reached if the refreshToken does not exist
 		res.clearCookie('refreshToken')
 		res.status(200).json({
 			message: 'Logout successfully',
