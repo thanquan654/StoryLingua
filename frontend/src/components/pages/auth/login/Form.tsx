@@ -86,7 +86,7 @@ export default function LoginForm() {
 							<input
 								id="password"
 								name="password"
-								defaultValue=""
+								defaultValue={state?.payload?.password || ''}
 								type={showPassword ? 'text' : 'password'}
 								autoComplete="current-password"
 								min={6}
