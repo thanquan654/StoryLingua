@@ -1,6 +1,6 @@
 import { ApiError, ErrorResponse } from '@/types/common'
 
-// Logic chọn Base URL
+// Base URL selection logic
 const isServer = typeof window === 'undefined'
 const BASE_URL = isServer ? process.env.NEXT_PUBLIC_API_URL : '/api/proxy'
 
