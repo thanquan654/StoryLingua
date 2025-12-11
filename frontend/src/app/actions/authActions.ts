@@ -139,7 +139,15 @@ export async function registerAction(
 	} catch (error) {
 		if (error instanceof ApiError) {
 			if (error.status === 429) {
-				return { message: 'Too Many Request, please try later' }
+				return {
+					message: 'Too Many Request, please try later',
+					payload: {
+						displayName: displayName,
+						email: email,
+						password: password,
+						confirmPassword: confirmPassword,
+					},
+				}
 			}
 			return {
 				message: error.message,
@@ -151,7 +159,15 @@ export async function registerAction(
 				},
 			}
 		}
-		return { message: 'Unknown Error' }
+		return {
+			message: 'Unknown Error',
+			payload: {
+				displayName: displayName,
+				email: email,
+				password: password,
+				confirmPassword: confirmPassword,
+			},
+		}
 	}
 
 	redirect('/')
