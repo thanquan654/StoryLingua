@@ -71,7 +71,13 @@ export async function loginAction(
 				},
 			}
 		}
-		return { message: 'Unknown Error' }
+		return {
+			message: 'Unknown Error',
+			payload: {
+				email: email,
+				password: password,
+			},
+		}
 	}
 
 	redirect('/')

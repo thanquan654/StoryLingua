@@ -19,10 +19,12 @@ app.use(
 	}),
 )
 app.use(morgan('combined'))
-app.use(rateLimit({
-    max: 10,
-    windowMs: 15 * 60 * 1000
-}))
+app.use(
+	rateLimit({
+		max: 1000,
+		windowMs: 15 * 60 * 1000,
+	}),
+)
 
 // Routes
 app.use('/api/', appRouter)
