@@ -1,10 +1,5 @@
 import { apiClient } from '@/lib/apiClient'
-import {
-	LoginRequest,
-	AuthResponse,
-	RegisterRequest,
-	RegisterResponse,
-} from '@/types/auth'
+import { LoginRequest, AuthResponse, RegisterRequest } from '@/types/auth'
 import { APIResponse } from '@/types/common'
 
 export const authService = {

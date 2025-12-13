@@ -1,5 +1,6 @@
 'use client'
 
+import { User as UserType } from '@/types/user'
 import { Home, LibraryBig, Store, User, WalletCards } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,7 +13,7 @@ const navItems = [
 	{ icon: <Store />, label: 'Cửa hàng', path: '/dashboard/shop' },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ user }: { user: UserType | null }) {
 	const pathname = usePathname()
 
 	return (
@@ -117,15 +118,17 @@ export default function Sidebar() {
 						<div className="size-12 shrink-0 rounded-full bg-slate-800 border-2 border-slate-700 overflow-hidden">
 							{/* FIXME: Placeholder, replace with user data */}
 							<Image
-								src={'/app-icon.png'}
-								alt="app-logo"
+								src={
+									user?.avatar ? user.avatar : '/app-icon.png'
+								}
+								alt="user-avartar"
 								width={40}
 								height={40}
 							/>
 						</div>
 						<div className="flex-1 min-w-0">
 							<p className="text-xs font-bold text-purple-300 mb-0.5">
-								Thân Quân
+								{user?.displayName}
 							</p>
 						</div>
 					</div>
