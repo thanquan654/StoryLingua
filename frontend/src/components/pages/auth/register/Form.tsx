@@ -42,6 +42,7 @@ export default function RegisterForm() {
 								name="displayName"
 								type="text"
 								placeholder="john_doe"
+								tabIndex={1}
 								min={4}
 								max={32}
 								defaultValue={state?.payload?.displayName || ''}
@@ -71,6 +72,7 @@ export default function RegisterForm() {
 								name="email"
 								type="email"
 								defaultValue={state?.payload?.email || ''}
+								tabIndex={2}
 								placeholder="name@example.com"
 								className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 								required
@@ -103,6 +105,7 @@ export default function RegisterForm() {
 								placeholder="••••••••"
 								className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm"
 								required
+								tabIndex={3}
 								autoComplete="new-password"
 							/>
 							<button
@@ -145,6 +148,7 @@ export default function RegisterForm() {
 								placeholder="••••••••"
 								className={`w-full bg-[#1E293B] border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 transition-all shadow-sm border-gray-700 focus:border-amber-500 focus:ring-amber-500`}
 								required
+								tabIndex={4}
 								autoComplete="new-password"
 							/>
 							<button
@@ -173,6 +177,7 @@ export default function RegisterForm() {
 						type="submit"
 						className="w-full h-12 bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black rounded-xl font-bold shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all hover:cursor-pointer hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
 						disabled={isPending}
+						tabIndex={5}
 					>
 						{isPending ? (
 							<span className="flex items-center gap-2">
@@ -209,6 +214,7 @@ export default function RegisterForm() {
 					<button
 						type="button"
 						className="flex items-center justify-center gap-3 h-12 bg-white text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all font-bold text-sm"
+						tabIndex={5}
 					>
 						<GoogleIcon />
 						Continue with Google
@@ -219,6 +225,7 @@ export default function RegisterForm() {
 					Already have an account?{' '}
 					<Link
 						href="/login"
+						tabIndex={6}
 						className="text-amber-400 hover:text-amber-300 font-bold hover:underline"
 					>
 						Log In
