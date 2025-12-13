@@ -127,14 +127,14 @@ export async function registerAction(
 			secure: process.env.NODE_ENV === 'production',
 			sameSite: 'lax',
 			path: '/',
-			maxAge: 15 * 60 * 1000, // 15 minutes
+			maxAge: 15 * 60, // 15 minutes
 		})
 
 		cookieStore.set('refreshToken', refreshToken, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			maxAge: 15 * 24 * 60 * 60 * 1000,
+			maxAge: 15 * 24 * 60 * 60,
 		})
 	} catch (error) {
 		if (error instanceof ApiError) {

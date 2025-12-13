@@ -35,13 +35,13 @@ export async function proxy(request: NextRequest) {
 					secure: process.env.NODE_ENV === 'production',
 					sameSite: 'lax',
 					path: '/',
-					maxAge: 15 * 60 * 1000, // 15 minutes
+					maxAge: 15 * 60, // 15 minutes
 				})
 				response.cookies.set('refreshToken', data.data.refreshToken, {
 					httpOnly: true,
 					secure: process.env.NODE_ENV === 'production',
 					path: '/',
-					maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+					maxAge: 15 * 24 * 60 * 60, // 15 days
 				})
 				return response
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
