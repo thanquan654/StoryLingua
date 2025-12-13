@@ -38,7 +38,7 @@ export default function BottomNavigation() {
 									}`}
 								>
 									<span
-										className={`material-symbols-outlined text-2xl transition-colors ${
+										className={`text-2xl transition-colors ${
 											isReallyActive
 												? 'text-purple-400 filled drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]'
 												: 'text-slate-500 group-hover:text-purple-400'

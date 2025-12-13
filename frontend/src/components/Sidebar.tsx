@@ -59,7 +59,7 @@ export default function Sidebar() {
 							}`}
 						>
 							<span
-								className={`material-symbols-outlined text-2xl transition-colors ${
+								className={`text-2xl transition-colors ${
 									isReallyActive
 										? 'text-purple-400 filled'
 										: 'text-slate-400 group-hover:text-white'
