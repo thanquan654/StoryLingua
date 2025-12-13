@@ -1,7 +1,7 @@
 import { LogoutButton } from '@/components/ui/logout-button'
 import React from 'react'
 
-export default function page() {
+export default function HomePage() {
 	return (
 		<div>
 			Dashboard
