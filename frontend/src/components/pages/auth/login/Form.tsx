@@ -46,6 +46,7 @@ export default function LoginForm() {
 								name="email"
 								type="email"
 								defaultValue={state?.payload?.email || ''}
+								tabIndex={1}
 								autoComplete="username"
 								placeholder="name@example.com"
 								className="w-full bg-[#1E293B] border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
@@ -88,6 +89,7 @@ export default function LoginForm() {
 								name="password"
 								defaultValue={state?.payload?.password || ''}
 								type={showPassword ? 'text' : 'password'}
+								tabIndex={2}
 								autoComplete="current-password"
 								min={6}
 								max={32}
@@ -127,6 +129,7 @@ export default function LoginForm() {
 						type="submit"
 						className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold shadow-[0_4px_14px_0_rgba(124,58,237,0.39)] hover:shadow-[0_6px_20px_rgba(124,58,237,0.23)] hover:-translate-y-0.5 transition-all duration-200 hover:cursor-pointer"
 						disabled={isPending}
+						tabIndex={3}
 					>
 						{isPending ? (
 							<span className="flex items-center gap-2">
@@ -164,6 +167,7 @@ export default function LoginForm() {
 					<button
 						type="button"
 						className="flex items-center justify-center gap-3 h-12 bg-white text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all font-bold text-sm hover:-translate-y-0.5 duration-200 hover:cursor-pointer"
+						tabIndex={4}
 					>
 						<GoogleIcon />
 						Sign in with Google
@@ -175,6 +179,7 @@ export default function LoginForm() {
 					<Link
 						href="/register"
 						className="text-violet-400 hover:text-violet-300 font-bold hover:underline transition-all"
+						tabIndex={5}
 					>
 						Create an account
 					</Link>
