@@ -58,9 +58,7 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(new URL('/login', request.url))
 	}
 
-	const headers = new Headers(request.headers)
-	headers.set('x-current-path', request.nextUrl.pathname)
-	return NextResponse.next({ headers })
+	return NextResponse.next()
 }
 
 export const config = {

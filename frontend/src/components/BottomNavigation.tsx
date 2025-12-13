@@ -1,25 +1,28 @@
+'use client'
+
 import { Home, LibraryBig, Store, User, WalletCards } from 'lucide-react'
-import { headers } from 'next/headers'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navItems = [
 	{ icon: <Home />, label: 'Trang chủ', path: '/dashboard' },
 	{ icon: <LibraryBig />, label: 'Thư viện', path: '/dashboard/library' },
-	{ icon: <WalletCards />, label: 'Từ vựng', path: '/dashboard/vocab' },
+	{ icon: <WalletCards />, label: 'Từ vựng', path: '/dashboard/vocabulary' },
 	{ icon: <User />, label: 'Hồ sơ', path: '/dashboard/profile' },
 	{ icon: <Store />, label: 'Cửa hàng', path: '/dashboard/shop' },
 ]
 
-export default async function BottomNavigation() {
-	const pathname = (await headers()).get('x-current-path')
+export default function BottomNavigation() {
+	const pathname = usePathname()
 
 	return (
-		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0F172A]/95 backdrop-blur-xl border-t border-white/5 pb-6 pt-2 z-50">
+		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0F172A]/95 backdrop-blur-xl border-t border-white/5 pb-4 pt-2 z-50">
 			<ul className="grid grid-cols-5 items-center w-full px-2 max-w-md mx-auto">
 				{navItems.map((item) => {
 					const isReallyActive =
 						pathname === item.path ||
-						(item.path !== '/' && pathname?.includes(item.path))
+						(item.path !== '/dashboard' &&
+							pathname?.includes(item.path))
 
 					return (
 						<li key={item.path}>
