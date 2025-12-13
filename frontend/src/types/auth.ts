@@ -5,7 +5,7 @@ export type LoginRequest = {
 	password: string
 }
 
-export type LoginResponse = {
+export type AuthResponse = {
 	accessToken: string
 	refreshToken: string
 }

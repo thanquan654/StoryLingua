@@ -80,7 +80,7 @@ export async function loginAction(
 		}
 	}
 
-	redirect('/')
+	redirect('/dashboard')
 }
 
 export async function registerAction(
@@ -127,14 +127,14 @@ export async function registerAction(
 			secure: process.env.NODE_ENV === 'production',
 			sameSite: 'lax',
 			path: '/',
-			maxAge: 15 * 60,
+			maxAge: 15 * 60, // 15 minutes
 		})
 
 		cookieStore.set('refreshToken', refreshToken, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			maxAge: 7 * 24 * 60 * 60,
+			maxAge: 15 * 24 * 60 * 60,
 		})
 	} catch (error) {
 		if (error instanceof ApiError) {
@@ -169,6 +169,20 @@ export async function registerAction(
 			},
 		}
 	}
+
+	redirect('/dashboard')
+}
+
+export async function logoutAction(): Promise<void> {
+	const cookieStore = await cookies()
+	try {
+		const refreshToken = cookieStore.get('refreshToken')?.value
+		await authService.logout(refreshToken)
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	} catch (error) {}
+
+	cookieStore.delete('accessToken')
+	cookieStore.delete('refreshToken')
 
 	redirect('/')
 }
