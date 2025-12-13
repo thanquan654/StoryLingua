@@ -1,10 +1,11 @@
+import FeatureUnderConstruction from '@/components/FeatureUnderConstruction'
 import { LogoutButton } from '@/components/ui/logout-button'
-import React from 'react'
 
 export default function HomePage() {
 	return (
 		<div>
 			Dashboard
+			<FeatureUnderConstruction />
 			<LogoutButton />
 		</div>
 	)
