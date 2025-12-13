@@ -148,18 +148,9 @@ export const refreshToken = async (
 
 		const { user } = existingRefreshToken
 
-		// Refresh Token Rotation
 		await deleteRefreshToken(refreshToken)
-		const newRefreshToken = await generateRefreshToken(user.id)
-		const newAccessToken = generateAccessToken(user)
 
-		return res.status(200).json({
-			message: 'Refresh token successfully',
-			data: {
-				refreshToken: newRefreshToken,
-				accessToken: newAccessToken,
-			},
-		})
+		sendAuthResponse(res, user, 200, 'Refresh token successfully')
 	} catch (error) {
 		next(error)
 	}
