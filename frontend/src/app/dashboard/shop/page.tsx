@@ -1,5 +1,10 @@
-import React from 'react'
+import FeatureUnderConstruction from '@/components/FeatureUnderConstruction'
 
 export default function ShopPage() {
-	return <div>ShopPage</div>
+	return (
+		<div>
+			ShopPage
+			<FeatureUnderConstruction />
+		</div>
+	)
 }

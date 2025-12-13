@@ -1,5 +1,10 @@
-import React from 'react'
+import FeatureUnderConstruction from '@/components/FeatureUnderConstruction'
 
 export default function ProfilePage() {
-	return <div>ProfilePage</div>
+	return (
+		<div>
+			ProfilePage
+			<FeatureUnderConstruction />
+		</div>
+	)
 }

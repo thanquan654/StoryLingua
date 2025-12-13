@@ -1,5 +1,10 @@
-import React from 'react'
+import FeatureUnderConstruction from '@/components/FeatureUnderConstruction'
 
 export default function VocabularyPage() {
-	return <div>VocabularyPage</div>
+	return (
+		<div>
+			VocabularyPage
+			<FeatureUnderConstruction />
+		</div>
+	)
 }
