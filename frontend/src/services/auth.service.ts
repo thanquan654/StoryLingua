@@ -21,4 +21,26 @@ export const authService = {
 			body: JSON.stringify(payload),
 		})
 	},
+
+	logout: async (refreshToken: string | undefined) => {
+		let headers = {}
+		if (refreshToken) {
+			headers = { Cookie: `refreshToken=${refreshToken}` }
+		}
+		return apiClient<APIResponse<RegisterResponse>>('/auth/logout', {
+			method: 'POST',
+			headers,
+		})
+	},
+
+	refreshToken: async (refreshToken: string | undefined) => {
+		let headers = {}
+		if (refreshToken) {
+			headers = { Cookie: `refreshToken=${refreshToken}` }
+		}
+		return apiClient<APIResponse<RegisterResponse>>('/auth/refresh-token', {
+			method: 'POST',
+			headers,
+		})
+	},
 }

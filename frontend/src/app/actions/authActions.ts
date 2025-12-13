@@ -172,3 +172,17 @@ export async function registerAction(
 
 	redirect('/dashboard')
 }
+
+export async function logoutAction(): Promise<void> {
+	const cookieStore = await cookies()
+	try {
+		const refreshToken = cookieStore.get('refreshToken')?.value
+		authService.logout(refreshToken)
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	} catch (error) {}
+
+	cookieStore.delete('accessToken')
+	cookieStore.delete('refreshToken')
+
+	redirect('/')
+}
