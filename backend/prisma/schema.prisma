@@ -22,11 +22,12 @@ model User {
     updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
     // Relations
-    profile        UserProfile?
-    createdStories Story[]         @relation("UserCreatedStories")
-    flashcards     UserFlashcard[]
-    refreshTokens  RefreshToken[]
-    inventory      UserInventory[]
+    profile         UserProfile?
+    createdStories  Story[]          @relation("UserCreatedStories")
+    flashcards      UserFlashcard[]
+    refreshTokens   RefreshToken[]
+    inventory       UserInventory[]
+    userAppearances UserAppearance[]
 
     @@map("users")
 }
@@ -54,23 +55,40 @@ model UserProfile {
     userId String @id @map("user_id")
 
     // Game Stats
-    level         Int       @default(1)
-    currentXp     Int       @default(0) @map("current_xp")
-    gold          Int       @default(0)
-    streakCount   Int       @default(0) @map("streak_count")
-    lastStudyDate DateTime? @map("last_study_date") @db.Timestamptz
+    level     Int @default(1)
+    currentXp Int @default(0) @map("current_xp")
+    gold      Int @default(0)
 
-    // Energy System
-    energy    Int @default(5)
-    maxEnergy Int @default(5) @map("max_energy") // Tăng lên khi mua item Upgrade
-
-    // Equipped Items (Lưu ID để truy xuất nhanh)
-    currentAvatarFrameId String? @map("current_avatar_frame_id")
-    currentMascotSkinId  String? @map("current_mascot_skin_id")
+    // Energy & Streak System
+    streakCount      Int       @default(0) @map("streak_count")
+    lastStudyDate    DateTime? @map("last_study_date") @db.Timestamptz
+    energy           Int       @default(5)
+    lastEnergyUpdate DateTime  @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("user_profiles")
+}
+
+// 2. User Appearance (Specializing in equipment/fashion management)
+model UserAppearance {
+    userId String @id @map("user_id")
+
+    // Equipment
+    avatarFrameId     String? @map("avatar_frame_id")
+    mascotSkinId      String? @map("mascot_skin_id")
+    flashcardThemeId  String? @map("flashcard_theme_id")
+    collectionFrameId String? @map("collection_frame_id")
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    avatarFrame     Item? @relation("EquippedAvatarFrame", fields: [avatarFrameId], references: [id])
+    mascotSkin      Item? @relation("EquippedMascotSkin", fields: [mascotSkinId], references: [id])
+    flashcardTheme  Item? @relation("EquippedCardTheme", fields: [flashcardThemeId], references: [id])
+    collectionFrame Item? @relation("EquippedCollectionFrame", fields: [collectionFrameId], references: [id])
+
+    @@map("user_appearances")
 }
 
 // 3. Bảng Stories (Kho Truyện)
@@ -200,7 +218,11 @@ model Item {
 
     isAiGeneratedReward Boolean @default(false) @map("is_ai_generated_reward")
 
-    owners UserInventory[]
+    owners               UserInventory[]
+    equippedAvatarFrames UserAppearance[] @relation("EquippedAvatarFrame")
+    equippedMascotSkins  UserAppearance[] @relation("EquippedMascotSkin")
+    equippedCardThemes   UserAppearance[] @relation("EquippedCardTheme")
+    collectionFrames     UserAppearance[] @relation("EquippedCollectionFrame")
 
     @@map("items")
 }
@@ -229,4 +251,31 @@ model UserInventory {
     item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
     @@map("user_inventory")
+}
+// 10. User Progress Table (Tracks user's progress on stories and questions)
+model UserProgress {
+    id String @id @default(uuid(7)) @map("progress_id")
+
+    userId  String @map("user_id")
+    storyId String @map("story_id")
+
+    // Story Progress
+    lastReadSentence Int       @default(0) @map("last_read_sentence")
+    isStoryCompleted Boolean   @default(false) @map("is_story_completed")
+    storyCompletedAt DateTime? @map("story_completed_at") @db.Timestamptz
+
+    // Quiz Progress
+    quizScore        Int?      @map("quiz_score")
+    totalQuestions   Int?      @map("total_questions")
+    quizCompletedAt  DateTime? @map("quiz_completed_at") @db.Timestamptz
+    lastQuizAttempt  DateTime? @map("last_quiz_attempt") @db.Timestamptz
+
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, storyId], name: "unique_user_story_progress")
+    @@map("user_progress")
 }
