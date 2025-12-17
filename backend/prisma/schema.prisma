@@ -22,13 +22,14 @@ model User {
     updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
     // Relations
-    profile         UserProfile?
-    createdStories  Story[]          @relation("UserCreatedStories")
-    flashcards      UserFlashcard[]
-    refreshTokens   RefreshToken[]
-    inventory       UserInventory[]
-    userAppearances UserAppearance[]
-    userProgresses  UserProgress[]
+    profile            UserProfile?
+    createdStories     Story[]            @relation("UserCreatedStories")
+    flashcards         UserFlashcard[]
+    refreshTokens      RefreshToken[]
+    inventory          UserInventory[]
+    userAppearances    UserAppearance[]
+    userStoryHistories UserStoryHistory[]
+    reviewLogs         ReviewLog[]
 
     @@map("users")
 }
@@ -94,10 +95,8 @@ model UserAppearance {
 
 // 3. Stories Table (Core Content)
 model Story {
-    id String @id @default(uuid(7)) @map("story_id")
-
-    title String @db.VarChar(200)
-
+    id                 String             @id @default(uuid(7)) @map("story_id")
+    title              String             @db.VarChar(200)
     /**
      * * Stores the tokenized content for the interactive reader.
      * Structure: Array of Paragraphs -> Array of Tokens.
@@ -117,30 +116,24 @@ model Story {
      * - pos: part of speech (optional, for coloring)
      * - s: suffix (space or punctuation after the word)
      */
-    contentJson Json    @map("content_json")
-    rawContent  String? @map("raw_content") @db.Text
-
-    genre           String? @db.VarChar(50)
-    difficultyLevel String? @map("difficulty_level") @db.VarChar(2)
-
-    readingTime   Int?    @map("reading_time") // Unit: Minutes
-    wordCount     Int?    @map("word_count") // Total distinct words
-    isAiGenerated Boolean @default(false) @map("is_ai_generated")
-    userPrompt    String? @map("user_prompt") @db.Text
-
-    creatorId  String? @map("creator_id")
-    coverImage String? @map("cover_image") @db.VarChar(255)
-
-    status StoryStatus @default(DRAFT)
-
-    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-    // --- Relations ---
-    creator        User?           @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
-    flashcards     UserFlashcard[]
-    questions      Question[]
-    userProgresses UserProgress[]
+    contentJson        Json               @map("content_json")
+    rawContent         String?            @map("raw_content") @db.Text
+    genre              String?            @db.VarChar(50)
+    difficultyLevel    String?            @map("difficulty_level") @db.VarChar(2)
+    readingTime        Int?               @map("reading_time") // Unit: Minutes
+    wordCount          Int?               @map("word_count") // Total distinct words
+    isAiGenerated      Boolean            @default(false) @map("is_ai_generated")
+    userPrompt         String?            @map("user_prompt") @db.Text
+    creatorId          String?            @map("creator_id")
+    coverImage         String?            @map("cover_image") @db.VarChar(255)
+    status             StoryStatus        @default(DRAFT)
+    createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+    // Relations
+    creator            User?              @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
+    flashcards         UserFlashcard[]
+    questions          Question[]
+    userStoryHistories UserStoryHistory[]
 
     // Indexes for Search & Filtering
     @@index([title])
@@ -158,30 +151,52 @@ enum StoryStatus {
 
 // 4. Question Table (Quiz after Reading Story)
 model Question {
-    id      String @id @default(uuid(7)) @map("question_id")
-    storyId String @map("story_id")
-
-    content String @db.Text // Nội dung câu hỏi
-
-    // Lưu options dưới dạng JSON cho gọn vì MVP không cần quá phức tạp
-    // Cấu trúc: [{"id": 1, "text": "Answer A", "isCorrect": false}, {"id": 2, "text": "Answer B", "isCorrect": true}]
-    options Json
-
-    explanation String? @db.Text // Giải thích tại sao đúng (cho user xem sau khi làm)
+    id          String       @id @default(uuid(7)) @map("question_id")
+    storyId     String       @map("story_id")
+    type        QuestionType @default(MULTIPLE_CHOICE)
+    content     String       @db.Text
+    data        Json
+    explanation String?      @db.Text
+    orderIndex  Int          @default(0) @map("order_index")
 
     story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
 
     @@map("questions")
 }
 
+enum QuestionType {
+    MULTIPLE_CHOICE
+    FILL_IN_THE_BLANK
+    MATCHING
+    SORTING
+}
+
+// 9. User Story History
+model UserStoryHistory {
+    id          String    @id @default(uuid(7))
+    userId      String    @map("user_id")
+    storyId     String    @map("story_id")
+    isRead      Boolean   @default(false) @map("is_read")
+    quizScore   Int?      @map("quiz_score")
+    lastReadAt  DateTime  @default(now()) @map("last_read_at")
+    completedAt DateTime? @map("completed_at")
+
+    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, storyId])
+    @@map("user_story_histories")
+}
+
 // 5. Vocabularies Table
 model Vocabulary {
-    id             String  @id @default(uuid(7)) @map("vocab_id")
-    word           String  @db.VarChar(100)
-    generalMeaning String? @map("general_meaning")
-    ipa            String? @db.VarChar(100)
-    audioUrl       String? @map("audio_url") @db.VarChar(255)
-    pos            String? @db.VarChar(20) // Noun, Verb, Adj...
+    id              String  @id @default(uuid(7)) @map("vocab_id")
+    word            String  @db.VarChar(100)
+    definition      String? @db.Text
+    exampleSentence String? @map("example_sentence") @db.Text
+    ipa             String? @db.VarChar(100)
+    audioUrl        String? @map("audio_url") @db.VarChar(255)
+    pos             String? @db.VarChar(20) // Noun, Verb, Adj...
 
     flashcards UserFlashcard[]
 
@@ -190,24 +205,24 @@ model Vocabulary {
     @@map("vocabularies")
 }
 
-// 6. Bảng User Flashcards (Core FSRS - Context Aware)
+// 6. User Flashcards (Core FSRS)
 model UserFlashcard {
     id String @id @default(uuid(7)) @map("card_id")
 
-    userId        String  @map("user_id")
-    vocabId       String  @map("vocab_id")
-    sourceStoryId String? @map("source_story_id")
-
-    meaningInContext String  @map("meaning_in_context") // Nghĩa cụ thể trong ngữ cảnh
-    contextSentence  String? @map("context_sentence")
-
-    // FSRS Params
-    state          Int   @default(0) // 0: New, 1: Learning, 2: Review, 3: Relearning
-    stability      Float @default(0)
-    difficulty     Float @default(0)
-    elapsedDays    Int   @default(0) @map("elapsed_days")
-    scheduledDays  Int   @default(0) @map("scheduled_days")
-    retrievability Float @default(0)
+    userId           String    @map("user_id")
+    vocabId          String    @map("vocab_id")
+    sourceStoryId    String?   @map("source_story_id")
+    meaningInContext String?   @map("meaning_in_context") @db.Text
+    // Example sentence from the story (Context)
+    contextSentence  String?   @map("context_sentence") @db.Text
+    // Personal note
+    note             String?   @db.Text
+    // --- FSRS Parameters ---
+    state            CardState @default(NEW)
+    stability        Float     @default(0)
+    difficulty       Float     @default(0)
+    elapsedDays      Int       @default(0) @map("elapsed_days")
+    scheduledDays    Int       @default(0) @map("scheduled_days")
 
     lastReview DateTime? @map("last_review") @db.Timestamptz
     dueDate    DateTime  @default(now()) @map("due_date") @db.Timestamptz
@@ -224,94 +239,112 @@ model UserFlashcard {
     @@map("user_flashcards")
 }
 
-// 7. Bảng Review Logs (Lịch sử học)
+enum CardState {
+    NEW // 0
+    LEARNING // 1
+    REVIEW // 2
+    RELEARNING // 3
+}
+
+// 7. Review Logs
 model ReviewLog {
     id String @id @default(uuid(7)) @map("log_id")
 
+    userId String @map("user_id")
+
     cardId String @map("card_id")
 
-    rating         Int // 1: Again, 2: Hard, 3: Good, 4: Easy
-    reviewDuration Int?     @map("review_duration") // Milliseconds
+    rating Int
+
+    // [IMPORTANT FOR FSRS] Snapshot of data at the time of review
+    // Helps run the FSRS Optimizer later to find the most optimal w[] parameter set
+    state         CardState // State of the card at review time (New/Learning/Review...)
+    scheduledDays Int       @map("scheduled_days") // How many days it should have been studied after
+    elapsedDays   Int       @map("elapsed_days") // How many days it was actually studied after
+    stability     Float // Memory stability (After review)
+    difficulty    Float // Difficulty (After review)
+
+    reviewDuration Int?     @map("review_duration") // Milliseconds (To detect cheating)
     reviewedAt     DateTime @default(now()) @map("reviewed_at") @db.Timestamptz
 
+    // Relations
+    user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
     flashcard UserFlashcard @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
+    @@index([userId, reviewedAt])
     @@map("review_logs")
 }
 
-// 8. Bảng Items (Shop System)
+// 8. Items (Simple Shop System)
 model Item {
-    id          String   @id @default(uuid(7)) @map("item_id")
-    name        String   @db.VarChar(100)
-    description String?
-    type        ItemType
-    price       Int
-    imageUrl    String?  @map("image_url") @db.VarChar(255)
+    id          String  @id @default(uuid(7)) @map("item_id")
+    name        String  @db.VarChar(100)
+    description String? @db.Text
 
-    // Lưu thông số: { "energy_bonus": 5 } hoặc { "asset_url": "cat_skin.glb" }
-    properties Json? @map("properties")
+    type ItemType
+
+    price    Int
+    currency Currency @default(GOLD)
+
+    // Original price (to display promotions if desired, e.g., Price 100, crossed out to 80)
+    originalPrice Int? @map("original_price")
+
+    imageUrl String? @map("image_url") @db.VarChar(255)
+
+    // JSON containing parameters (e.g., { "energy": 5 } or { "asset": "skin.png" })
+    properties Json?
+
+    saleStartAt DateTime? @map("sale_start_at")
+    saleEndAt   DateTime? @map("sale_end_at")
+
+    isActive Boolean @default(true) @map("is_active") // Admin can hide/show item
 
     isAiGeneratedReward Boolean @default(false) @map("is_ai_generated_reward")
 
+    // Relations
     owners               UserInventory[]
     equippedAvatarFrames UserAppearance[] @relation("EquippedAvatarFrame")
     equippedMascotSkins  UserAppearance[] @relation("EquippedMascotSkin")
     equippedCardThemes   UserAppearance[] @relation("EquippedCardTheme")
     collectionFrames     UserAppearance[] @relation("EquippedCollectionFrame")
 
+    @@index([type])
     @@map("items")
 }
 
-enum ItemType {
-    AVATAR_FRAME // Khung avatar
-    MASCOT_SKIN // Skin cho mèo
-    CARD_THEME // Hình nền cho thẻ Flashcard
-    ENERGY_MAX_UPGRADE // Tăng giới hạn năng lượng (Vật phẩm thụ động/Consumable)
-    ENERGY_REFILL // Hồi đầy năng lượng (Consumable)
+enum Currency {
+    GOLD
 }
 
-// 9. Bảng User Inventory (Túi đồ)
+enum ItemType {
+    AVATAR_FRAME
+    MASCOT_SKIN
+    CARD_THEME
+    COLLECTION_FRAME
+    ENERGY_REFILL
+    STREAK_FREEZE
+    DOUBLE_XP_1H
+}
+
+// 9. User Inventory
 model UserInventory {
     id String @id @default(uuid(7)) @map("inventory_id")
 
     userId String @map("user_id")
     itemId String @map("item_id")
 
-    quantity   Int     @default(1) // Số lượng (Dùng cho bình năng lượng)
-    isEquipped Boolean @default(false) @map("is_equipped")
+    quantity Int @default(1)
+
+    // Expiration date (Used for rented/trial items)
+    // E.g., 7-day skin rental. A cron job will scan and delete/hide it upon expiration.
+    expiresAt DateTime? @map("expires_at")
 
     acquiredAt DateTime @default(now()) @map("acquired_at") @db.Timestamptz
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
     item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
+    // Each item in a user's inventory is unique (only the quantity increases)
+    @@unique([userId, itemId])
     @@map("user_inventory")
-}
-
-// 10. User Progress Table (Tracks user's progress on stories and questions)
-model UserProgress {
-    id String @id @default(uuid(7)) @map("progress_id")
-
-    userId  String @map("user_id")
-    storyId String @map("story_id")
-
-    // Story Progress
-    lastReadSentence Int       @default(0) @map("last_read_sentence")
-    isStoryCompleted Boolean   @default(false) @map("is_story_completed")
-    storyCompletedAt DateTime? @map("story_completed_at") @db.Timestamptz
-
-    // Quiz Progress
-    quizScore       Int?      @map("quiz_score")
-    totalQuestions  Int?      @map("total_questions")
-    quizCompletedAt DateTime? @map("quiz_completed_at") @db.Timestamptz
-    lastQuizAttempt DateTime? @map("last_quiz_attempt") @db.Timestamptz
-
-    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-    story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
-
-    @@unique([userId, storyId], name: "unique_user_story_progress")
-    @@map("user_progress")
 }
