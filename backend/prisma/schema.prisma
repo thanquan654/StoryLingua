@@ -28,6 +28,7 @@ model User {
     refreshTokens   RefreshToken[]
     inventory       UserInventory[]
     userAppearances UserAppearance[]
+    userProgresses  UserProgress[]
 
     @@map("users")
 }
@@ -91,34 +92,68 @@ model UserAppearance {
     @@map("user_appearances")
 }
 
-// 3. Bảng Stories (Kho Truyện)
+// 3. Stories Table (Core Content)
 model Story {
-    id              String  @id @default(uuid(7)) @map("story_id")
-    title           String  @db.VarChar(200)
-    contentJson     Json    @map("content_json") // Cấu trúc Token/Paragraph
-    rawContent      String? @map("raw_content") // Text thuần để search
+    id String @id @default(uuid(7)) @map("story_id")
+
+    title String @db.VarChar(200)
+
+    /**
+     * * Stores the tokenized content for the interactive reader.
+     * Structure: Array of Paragraphs -> Array of Tokens.
+     * * Example JSON:
+     * [
+     * {
+     * "id": "para_1",
+     * "tokens": [
+     * { "t": "Hello", "l": "hello", "pos": "INTJ", "s": " " },
+     * { "t": "world", "l": "world", "pos": "NOUN", "s": "." }
+     * ]
+     * }
+     * ]
+     * * Legend:
+     * - t: text (original word)
+     * - l: lemma (root form for dictionary lookup)
+     * - pos: part of speech (optional, for coloring)
+     * - s: suffix (space or punctuation after the word)
+     */
+    contentJson Json    @map("content_json")
+    rawContent  String? @map("raw_content") @db.Text
+
     genre           String? @db.VarChar(50)
-    difficultyLevel String? @map("difficulty_level") @db.VarChar(20)
+    difficultyLevel String? @map("difficulty_level") @db.VarChar(2)
 
-    readingTime Int? @map("reading_time") // Số phút đọc ước tính
-    wordCount   Int? @map("word_count") // Tổng số từ
-
-    // AI Tracking
+    readingTime   Int?    @map("reading_time") // Unit: Minutes
+    wordCount     Int?    @map("word_count") // Total distinct words
     isAiGenerated Boolean @default(false) @map("is_ai_generated")
-    userPrompt    String? @map("user_prompt") // Prompt gốc user nhập
+    userPrompt    String? @map("user_prompt") @db.Text
 
-    creatorId String? @map("creator_id")
+    creatorId  String? @map("creator_id")
+    coverImage String? @map("cover_image") @db.VarChar(255)
 
-    coverImage String?  @map("cover_image") @db.VarChar(255)
-    createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+    status StoryStatus @default(DRAFT)
 
-    creator    User?           @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
-    flashcards UserFlashcard[]
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-    questions Question[]
+    // --- Relations ---
+    creator        User?           @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
+    flashcards     UserFlashcard[]
+    questions      Question[]
+    userProgresses UserProgress[]
 
+    // Indexes for Search & Filtering
     @@index([title])
+    @@index([genre])
+    @@index([difficultyLevel])
     @@map("stories")
+}
+
+enum StoryStatus {
+    DRAFT // User created but not posted
+    PUBLISHED // Visible to everyone
+    PRIVATE // Only visible to creator
+    ARCHIVED // Soft deleted
 }
 
 // 4. Question Table (Quiz after Reading Story)
@@ -252,6 +287,7 @@ model UserInventory {
 
     @@map("user_inventory")
 }
+
 // 10. User Progress Table (Tracks user's progress on stories and questions)
 model UserProgress {
     id String @id @default(uuid(7)) @map("progress_id")
@@ -265,10 +301,10 @@ model UserProgress {
     storyCompletedAt DateTime? @map("story_completed_at") @db.Timestamptz
 
     // Quiz Progress
-    quizScore        Int?      @map("quiz_score")
-    totalQuestions   Int?      @map("total_questions")
-    quizCompletedAt  DateTime? @map("quiz_completed_at") @db.Timestamptz
-    lastQuizAttempt  DateTime? @map("last_quiz_attempt") @db.Timestamptz
+    quizScore       Int?      @map("quiz_score")
+    totalQuestions  Int?      @map("total_questions")
+    quizCompletedAt DateTime? @map("quiz_completed_at") @db.Timestamptz
+    lastQuizAttempt DateTime? @map("last_quiz_attempt") @db.Timestamptz
 
     createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
     updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
