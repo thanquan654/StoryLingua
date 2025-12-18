@@ -9,7 +9,7 @@ import crypto from 'crypto'
  * @returns A Promise that resolves to the user object if found, or null otherwise.
  */
 export const findUserByEmail = async (email: string): Promise<User | null> => {
-	return await prisma.user.findUnique({
+	return prisma.user.findUnique({
 		where: {
 			email: email,
 		},
