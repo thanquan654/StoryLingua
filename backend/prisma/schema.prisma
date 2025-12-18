@@ -19,7 +19,7 @@ model User {
     isEmailVerified Boolean  @default(false) @map("is_email_verified")
     isActive        Boolean  @default(true) @map("is_active")
     createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-    updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
     // Relations
     profile            UserProfile?
@@ -27,7 +27,7 @@ model User {
     flashcards         UserFlashcard[]
     refreshTokens      RefreshToken[]
     inventory          UserInventory[]
-    userAppearances    UserAppearance[]
+    userAppearance     UserAppearance?
     userStoryHistories UserStoryHistory[]
     reviewLogs         ReviewLog[]
 
@@ -128,7 +128,7 @@ model Story {
     coverImage         String?            @map("cover_image") @db.VarChar(255)
     status             StoryStatus        @default(DRAFT)
     createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
-    updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+    updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
     // Relations
     creator            User?              @relation("UserCreatedStories", fields: [creatorId], references: [id], onDelete: SetNull)
     flashcards         UserFlashcard[]

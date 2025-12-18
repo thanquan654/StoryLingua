@@ -9,7 +9,7 @@ import crypto from 'crypto'
  * @returns A Promise that resolves to the user object if found, or null otherwise.
  */
 export const findUserByEmail = async (email: string): Promise<User | null> => {
-	return await prisma.user.findUnique({
+	return prisma.user.findUnique({
 		where: {
 			email: email,
 		},
@@ -24,7 +24,13 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
 export const createUser = async (
 	userData: Omit<
 		User,
-		'id' | 'createdAt' | 'updatedAt' | 'passwordHash' | 'role'
+		| 'id'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'passwordHash'
+		| 'role'
+		| 'isEmailVerified'
+		| 'isActive'
 	> & { password?: string },
 ): Promise<User> => {
 	const { displayName, email, password, avatar, googleId } = userData
@@ -38,6 +44,22 @@ export const createUser = async (
 			passwordHash: hashedPassword,
 			avatar,
 			googleId,
+
+			profile: {
+				create: {
+					level: 1,
+					currentXp: 0,
+					gold: 0,
+					energy: 25,
+				},
+			},
+
+			userAppearance: {
+				create: {
+					avatarFrameId: null,
+					mascotSkinId: null,
+				},
+			},
 		},
 	})
 }
