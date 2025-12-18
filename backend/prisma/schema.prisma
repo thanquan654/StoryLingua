@@ -65,14 +65,14 @@ model UserProfile {
     streakCount      Int       @default(0) @map("streak_count")
     lastStudyDate    DateTime? @map("last_study_date") @db.Timestamptz
     energy           Int       @default(5)
-    lastEnergyUpdate DateTime  @default(now())
+    lastEnergyUpdate DateTime  @default(now()) @db.Timestamptz
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("user_profiles")
 }
 
-// 2. User Appearance (Specializing in equipment/fashion management)
+// 3. User Appearance (Specializing in equipment/fashion management)
 model UserAppearance {
     userId String @id @map("user_id")
 
@@ -85,15 +85,15 @@ model UserAppearance {
     // Relations
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    avatarFrame     Item? @relation("EquippedAvatarFrame", fields: [avatarFrameId], references: [id])
-    mascotSkin      Item? @relation("EquippedMascotSkin", fields: [mascotSkinId], references: [id])
-    flashcardTheme  Item? @relation("EquippedCardTheme", fields: [flashcardThemeId], references: [id])
-    collectionFrame Item? @relation("EquippedCollectionFrame", fields: [collectionFrameId], references: [id])
+    avatarFrame     Item? @relation("EquippedAvatarFrame", fields: [avatarFrameId], references: [id], onDelete: SetNull)
+    mascotSkin      Item? @relation("EquippedMascotSkin", fields: [mascotSkinId], references: [id], onDelete: SetNull)
+    flashcardTheme  Item? @relation("EquippedCardTheme", fields: [flashcardThemeId], references: [id], onDelete: SetNull)
+    collectionFrame Item? @relation("EquippedCollectionFrame", fields: [collectionFrameId], references: [id], onDelete: SetNull)
 
     @@map("user_appearances")
 }
 
-// 3. Stories Table (Core Content)
+// 4. Stories Table (Core Content)
 model Story {
     id                 String             @id @default(uuid(7)) @map("story_id")
     title              String             @db.VarChar(200)
@@ -149,7 +149,7 @@ enum StoryStatus {
     ARCHIVED // Soft deleted
 }
 
-// 4. Question Table (Quiz after Reading Story)
+// 5. Question Table (Quiz after Reading Story)
 model Question {
     id          String       @id @default(uuid(7)) @map("question_id")
     storyId     String       @map("story_id")
@@ -171,15 +171,15 @@ enum QuestionType {
     SORTING
 }
 
-// 9. User Story History
+// 6. User Story History
 model UserStoryHistory {
     id          String    @id @default(uuid(7))
     userId      String    @map("user_id")
     storyId     String    @map("story_id")
     isRead      Boolean   @default(false) @map("is_read")
     quizScore   Int?      @map("quiz_score")
-    lastReadAt  DateTime  @default(now()) @map("last_read_at")
-    completedAt DateTime? @map("completed_at")
+    lastReadAt  DateTime  @default(now()) @map("last_read_at") @db.Timestamptz
+    completedAt DateTime? @map("completed_at") @db.Timestamptz
 
     user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
     story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -188,7 +188,7 @@ model UserStoryHistory {
     @@map("user_story_histories")
 }
 
-// 5. Vocabularies Table
+// 7. Vocabularies Table
 model Vocabulary {
     id              String  @id @default(uuid(7)) @map("vocab_id")
     word            String  @db.VarChar(100)
@@ -205,7 +205,7 @@ model Vocabulary {
     @@map("vocabularies")
 }
 
-// 6. User Flashcards (Core FSRS)
+// 8. User Flashcards (Core FSRS)
 model UserFlashcard {
     id String @id @default(uuid(7)) @map("card_id")
 
@@ -246,7 +246,7 @@ enum CardState {
     RELEARNING // 3
 }
 
-// 7. Review Logs
+// 9. Review Logs
 model ReviewLog {
     id String @id @default(uuid(7)) @map("log_id")
 
@@ -275,7 +275,7 @@ model ReviewLog {
     @@map("review_logs")
 }
 
-// 8. Items (Simple Shop System)
+// 10. Items (Simple Shop System)
 model Item {
     id          String  @id @default(uuid(7)) @map("item_id")
     name        String  @db.VarChar(100)
@@ -294,8 +294,8 @@ model Item {
     // JSON containing parameters (e.g., { "energy": 5 } or { "asset": "skin.png" })
     properties Json?
 
-    saleStartAt DateTime? @map("sale_start_at")
-    saleEndAt   DateTime? @map("sale_end_at")
+    saleStartAt DateTime? @map("sale_start_at") @db.Timestamptz
+    saleEndAt   DateTime? @map("sale_end_at") @db.Timestamptz
 
     isActive Boolean @default(true) @map("is_active") // Admin can hide/show item
 
@@ -326,7 +326,7 @@ enum ItemType {
     DOUBLE_XP_1H
 }
 
-// 9. User Inventory
+// 11. User Inventory
 model UserInventory {
     id String @id @default(uuid(7)) @map("inventory_id")
 
