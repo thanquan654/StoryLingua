@@ -27,7 +27,7 @@ model User {
     flashcards         UserFlashcard[]
     refreshTokens      RefreshToken[]
     inventory          UserInventory[]
-    userAppearances    UserAppearance[]
+    userAppearance     UserAppearance?
     userStoryHistories UserStoryHistory[]
     reviewLogs         ReviewLog[]
 
