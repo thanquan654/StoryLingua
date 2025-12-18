@@ -1,6 +1,7 @@
+import { storyService } from '@/services/story.service'
 import { BookOpen, Edit, Grid2X2, Play, Search } from 'lucide-react'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
-import React from 'react'
 
 const books = [
 	{
@@ -69,7 +70,19 @@ const books = [
 	},
 ]
 
-export default function LibraryPage() {
+export default async function LibraryPage() {
+	const token = (await cookies()).get('accessToken')?.value
+
+	const stories = await storyService
+		.getAllStories(token, {
+			page: 1,
+		})
+		.catch(() => {
+			return []
+		})
+
+	console.log('🚀 ~ stories:', stories)
+
 	return (
 		<div className="bg-[#0F172A] font-display text-white antialiased overflow-hidden h-screen flex flex-col">
 			<header className="px-5 md:px-8 pt-12 md:pt-8 pb-4 flex flex-col gap-4 bg-[#0F172A] z-10 sticky top-0 border-b border-white/5 md:border-none">

@@ -8,7 +8,7 @@ export const userService = {
 		if (accessToken) {
 			headers = { Authorization: `Bearer ${accessToken}` }
 		}
-		return apiClient<APIResponse<User>>('/user/me', {
+		return apiClient<APIResponse<User>>('/users/me', {
 			method: 'GET',
 			headers,
 		})
