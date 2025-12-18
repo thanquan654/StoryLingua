@@ -54,7 +54,7 @@ export const createUser = async (
 				},
 			},
 
-			userAppearances: {
+			userAppearance: {
 				create: {
 					avatarFrameId: null,
 					mascotSkinId: null,
