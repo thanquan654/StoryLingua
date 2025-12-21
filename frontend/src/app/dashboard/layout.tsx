@@ -11,7 +11,10 @@ export default async function DashboardLayout({
 }) {
 	const accessToken = (await cookies()).get('accessToken')?.value
 
-	const userProfile = await (await userService.getMyProfile(accessToken)).data
+	const userProfile = await (
+		await userService.getMyProfile(accessToken)
+	).data.user
+
 	return (
 		<div className="flex min-h-screen bg-[#0F172A]">
 			<div className="flex-1 w-full md:pl-56 transition-[padding] duration-300 relative isolate">
