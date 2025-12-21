@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/apiClient'
 import { APIResponse } from '@/types/common'
-import { User } from '@/types/user'
+import { GetProfileApiResponse } from '@/types/user'
 
 export const userService = {
 	getMyProfile: async (accessToken: string | undefined) => {
@@ -8,7 +8,7 @@ export const userService = {
 		if (accessToken) {
 			headers = { Authorization: `Bearer ${accessToken}` }
 		}
-		return apiClient<APIResponse<User>>('/user/me', {
+		return apiClient<APIResponse<GetProfileApiResponse>>('/users/me', {
 			method: 'GET',
 			headers,
 		})
