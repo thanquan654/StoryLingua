@@ -23,15 +23,6 @@ export default async function LibraryPage() {
 					<h1 className="text-[28px] md:text-3xl font-bold tracking-tight text-white leading-tight font-serif">
 						The Grand Library
 					</h1>
-					<div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#1E293B] border border-white/10 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer hover:border-purple-500/50 transition-colors">
-						<div
-							className="bg-cover bg-center w-full h-full"
-							style={{
-								backgroundImage:
-									'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAC0qjdXDJmCzinIIbJ9Ea0N16Iup9MWWKbsm-aA2c7k5kbw7dnacc98MAwp1QCFBdTehR3YZv14uEo1jm9UY8gfPEhRfU91pIEoYCYlPOY4B3kn-pUIqyUBZR8F8YXL0uJmdwsMid91pYRRkFtppuUFSru-x_1ZBAQ4E0sZ4qm9MKoz21i2PGONSWCAykNU7LBUGq6zo9SigxSFqUsIOY8ZeJtcOobtiqcoi9A7EwwoCVj6VLbCuvlstTg9nxVeAfIwafLCMJ1Xko")',
-							}}
-						></div>
-					</div>
 				</div>
 				<div className="relative group max-w-xl">
 					<div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -48,22 +39,9 @@ export default async function LibraryPage() {
 			</header>
 
 			<main className="flex-1 overflow-y-auto no-scrollbar pb-24 md:pb-8 relative px-5 md:px-8">
-				{/* Responsive Filter Bar */}
-				<div className="sticky top-0 z-20 bg-[#0F172A]/95 backdrop-blur-sm -mx-5 px-5 md:mx-0 md:px-0 md:bg-transparent md:static mb-4 md:mb-6">
-					<nav className="-mb-px flex items-center justify-between md:justify-start md:gap-8 border-b border-white/5 md:border-none">
-						<div className="flex space-x-6 md:space-x-8">
-							<button className="border-purple-500 text-white whitespace-nowrap border-b-[3px] py-4 px-1 text-sm font-semibold tracking-wide bg-transparent cursor-pointer">
-								Khám phá
-							</button>
-							<button className="border-transparent text-slate-400 whitespace-nowrap border-b-[3px] py-4 px-1 text-sm font-medium hover:text-white hover:border-white/20 transition-all bg-transparent cursor-pointer">
-								Truyện của tôi
-							</button>
-						</div>
-					</nav>
-				</div>
-
 				{/* Filter Chips */}
-				<div className="flex gap-3 py-2 overflow-x-auto no-scrollbar mb-4 md:mb-8 md:flex-wrap">
+				<div className="flex gap-3 py-2 overflow-x-auto no-scrollbar md:flex-wrap">
+					<span>Genres: </span>
 					<button className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-600 text-white text-xs font-bold shadow-glow border border-white/10 shrink-0 hover:bg-purple-500 transition-colors">
 						All
 					</button>
@@ -76,6 +54,22 @@ export default async function LibraryPage() {
 						'Romance',
 						'Horror',
 					].map((g) => (
+						<button
+							key={g}
+							className="px-4 py-2 rounded-full bg-[#1E293B] text-slate-300 border border-white/5 text-xs font-medium whitespace-nowrap hover:bg-white/10 hover:text-white transition-colors shrink-0"
+						>
+							{g}
+						</button>
+					))}
+				</div>
+
+				{/* Filter Chips */}
+				<div className="flex items-center gap-3 py-2 overflow-x-auto no-scrollbar mb-4 md:mb-8 md:flex-wrap">
+					<span>Level: </span>
+					<button className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-600 text-white text-xs font-bold shadow-glow border border-white/10 shrink-0 hover:bg-purple-500 transition-colors">
+						All
+					</button>
+					{['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((g) => (
 						<button
 							key={g}
 							className="px-4 py-2 rounded-full bg-[#1E293B] text-slate-300 border border-white/5 text-xs font-medium whitespace-nowrap hover:bg-white/10 hover:text-white transition-colors shrink-0"
@@ -124,20 +118,26 @@ export default async function LibraryPage() {
 											className="object-cover"
 										/>
 										{/* Difficulty Badge on Mobile Image */}
-										<div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-purple-600/90 text-[8px] font-bold text-white backdrop-blur-sm">
+										<div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-purple-600/90 text-[10px] font-bold text-white backdrop-blur-sm">
 											{story.difficultyLevel}
 										</div>
+										{/* Status Badge on Mobile Image */}
+										{story.status !== 'PUBLISHED' && (
+											<div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black-600/90 text-[10px] font-bold text-white backdrop-blur-sm">
+												{story.status}
+											</div>
+										)}
 									</div>
 
 									<div className="flex flex-col justify-between flex-1 min-w-0 py-1">
 										<div>
-											<h4 className="text-sm font-semibold text-white truncate pr-2 group-hover:text-purple-400 transition-colors font-serif">
+											<h4 className="text-md font-semibold text-white truncate pr-2 group-hover:text-purple-400 transition-colors font-serif">
 												{story.title}
 											</h4>
 											<p className="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-relaxed">
 												{story.rawContent?.substring(
 													0,
-													80,
+													100,
 												)}
 												...
 											</p>
@@ -174,7 +174,7 @@ export default async function LibraryPage() {
 
 									{story.status !== 'PUBLISHED' && (
 										<div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-											<span className="px-2 py-1 rounded-md bg-black/60 backdrop-blur-md  text-white text-[10px] font-bold border border-white/10 shadow-lg">
+											<span className="px-2 py-1 rounded-md bg-black-600/60 backdrop-blur-md  text-white text-[10px] font-bold border border-white/10 shadow-lg">
 												{story.status}
 											</span>
 										</div>
@@ -250,16 +250,6 @@ export default async function LibraryPage() {
 					</div>
 				)}
 			</main>
-
-			{/* Mobile FAB - Hidden on Desktop */}
-			<Link
-				href={'/dashboard/create'}
-				className="md:hidden fixed bottom-24 right-5 h-14 w-14 bg-purple-600 text-white rounded-2xl shadow-glow-strong flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40 group"
-			>
-				<span className="material-symbols-outlined text-[28px] group-hover:rotate-12 transition-transform">
-					<Edit />
-				</span>
-			</Link>
 		</div>
 	)
 }
