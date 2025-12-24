@@ -7,4 +7,9 @@ const withSerwist = withSerwistInit({
 
 export default withSerwist({
 	turbopack: {},
+	images: {
+		remotePatterns: [
+			new URL('https://res.cloudinary.com/dqiphtdgd/image/**'),
+		],
+	},
 })
