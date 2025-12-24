@@ -26,6 +26,6 @@ export const getUserProfile = async (
 			data: userProfile,
 		})
 	} catch (error) {
-		next()
+		next(error)
 	}
 }
