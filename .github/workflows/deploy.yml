@@ -1,0 +1,84 @@
+name: Deploy to VPS
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup SSH
+              uses: webfactory/ssh-agent@v0.8.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Add server to known hosts
+              run: |
+                  mkdir -p ~/.ssh
+                  ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+            - name: Create .env file on server
+              run: |
+                  ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+                    cd ~/StoryLingua
+                    cat > .env << 'ENVEOF'
+                  POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+                  POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+                  POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+                  JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+                  NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+                  ENVEOF
+                  EOF
+
+            - name: Deploy to VPS
+              run: |
+                  ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+                    cd ~/StoryLingua
+
+                    # Pull latest code
+                    git pull origin main
+
+                    # Stop containers
+                    docker-compose -f docker-compose.prod.yml down
+
+                    # Remove old image
+                    docker image prune -af --filter "until=24h"
+
+                    # Build and start containers
+                    echo "Building backend..."
+                    docker-compose -f docker-compose.prod.yml build backend
+
+                    echo "Building frontend..."
+                    docker-compose -f docker-compose.prod.yml build frontend
+
+                    echo "Starting services..."
+                    docker-compose -f docker-compose.prod.yml up -d
+
+                    # Cleanup
+                    docker system prune -f
+
+                    echo "Deployment completed!"
+                  EOF
+
+            - name: Check deployment status
+              run: |
+                  ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+                    cd ~/StoryLingua
+                    docker-compose -f docker-compose.prod.yml ps
+                  EOF
+
+            - name: Notify deployment
+              if: always()
+              run: |
+                  if [ ${{ job.status }} == 'success' ]; then
+                    echo "✅ Deployment successful!"
+                  else
+                    echo "❌ Deployment failed!"
+                  fi

@@ -12,4 +12,5 @@ export default withSerwist({
 			new URL('https://res.cloudinary.com/dqiphtdgd/image/**'),
 		],
 	},
+	output: 'standalone',
 })
